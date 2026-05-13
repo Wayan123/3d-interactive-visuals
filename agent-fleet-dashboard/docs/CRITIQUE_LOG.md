@@ -318,3 +318,78 @@ Dikonfirmasi via headless Chrome screenshots (SwiftShader WebGL):
 - Top-bar search with keyboard shortcut (`⌘K` already shown but not wired).
 - Panel animation transitions (fade/slide) for smoother feel.
 - Settings row for canvas-background colour override per theme.
+
+---
+
+# Pass 22+ (v0.7 — 10 new specimens + 3 new categories)
+
+## Pass 22 · Design + scope
+
+Goal: expand from 16 → 26 specimens with more biological diversity. Target categories to add: Immune cells (expanded), Fungi, Protists, Reproductive.
+
+10 new specimens:
+- Neutrophil (PMN granulocyte with multilobed nucleus)
+- B-cell (lymphocyte with Y-shaped BCRs)
+- Macrophage (phagocyte with pseudopodia + phagosomes + lysosomes)
+- Platelet (biconvex disc thrombocyte)
+- Yeast (Saccharomyces cerevisiae with budding daughter)
+- Paramecium (ciliated protozoan with cilia carpet + two nuclei)
+- Amoeba (shape-shifting protozoan with pseudopods)
+- Spermatozoon (head + acrosome + midpiece + flagellum tail)
+- Staphylococcus aureus (grape-cluster Gram-positive cocci)
+- Ebola virus (filamentous RNA virus with GP spikes)
+
+## Pass 23 · Implementation
+
+Delivered:
+
+- 10 new procedural builders in `assets/bio/geometry.js` (~900 LOC added).
+- 10 new entries in `cells.json` with full taxonomy + components + facts + funFact.
+- Ebola carries its own 5-stage lifecycle (so now 6 viruses with Process mode).
+- 3 new categories added to `cells.json`: Immune cells, Fungi, Protists + Reproductive cells.
+- "Specialised" category renamed → "Immune cells" (4 cells: tcell, bcell, macrophage, neutrophil).
+- Taxonomy tree extended: Archaea empty, Protista with 2 cells, Fungi with 1, Animalia > Immune cells subdivided into T-cell / B-cell / Macrophage / Neutrophil, Animalia > Reproductive.
+- 10 new CAD source files in `cad_source/` following existing build123d convention.
+
+## Pass 24 · Visual critique (headless Chrome + screenshot review)
+
+Each new specimen was rendered and reviewed:
+
+- **Neutrophil** ✓ multilobed nucleus (4 purple lobes connected by strands), yellow granules, pseudopod bulges. Classic PMN shape.
+- **B-cell** ✓ smooth blue membrane, Y-shaped BCRs on surface. Distinct from T-cell (which uses cone receptors).
+- **Macrophage** ✓ large irregular purple body, pseudopod bumps extending outward, teal phagosomes + pink lysosomes inside.
+- **Platelet** ✓ small biconvex disc with granules + microtubule ring.
+- **Yeast** ✓ mother + budding daughter attached, with chitin wall + nucleus + vacuole visible. Iconic S. cerevisiae.
+- **Paramecium** ✓ slipper-shaped body with dense cilia carpet radiating outward. Macronucleus + micronucleus + oral groove visible.
+- **Amoeba** ✓ irregular magenta blob with 5 finger-like pseudopods extending. Nucleus + vacuoles visible.
+- **Sperm** ⚠ initially off-centre (head at +x, tail at -x). Fixed via camera bbox-centre targeting + status-ring footprint cap.
+- **Staphylococcus aureus** ✓ cluster of 9 cocci with peptidoglycan wall rings + nucleoids. Instantly recognisable grape-cluster morphology.
+- **Ebola** ✓ long curved filament with GP spike trimers + helical nucleocapsid. Clearly different from icosahedral/spherical viruses.
+
+## Pass 25 · Scene fixes
+
+- `_focusOnSelected()` now targets the cell's actual bounding-box centre (not origin), so elongated cells (sperm, muscle, ebola, paramecium) are framed correctly.
+- Status-ring footprint capped at 1.9 to avoid huge rings on elongated cells.
+- Camera zoom factor reduced from 1.9 × maxDim to 1.35 × maxDim so long cells fill the viewport nicely.
+
+## Pass 26 · Atlas with 26 specimens
+
+Atlas rendering shows rich biodiversity: 26 cells visible simultaneously in a packed orbit. While crowded in the centre, it successfully conveys "variety of life" \u2014 which is the atlas' role (drill into a cell via sidebar click or Gallery panel for detail).
+
+## Pass 27 · Verification
+
+- Headless node script validated all 10 new builders \u2014 each returns a valid THREE.Group with non-empty componentMap.
+- `python3 -m py_compile server.py` \u2014 OK.
+- `python3 -c "import json; json.load(...)"` on cells.json \u2014 valid.
+- `node --check` on all JS modules \u2014 OK.
+- Fresh demo GIF captured with mix of new + old specimens (14 frames, ~1.3 MB).
+- `/api/cells` returns 26 cells across 9 categories.
+
+## Yang masih bisa di-improve (next setelah v0.7)
+
+- Atlas auto-positioning algorithm to avoid overlap when specimen count grows.
+- Add Archaea specimen (e.g. methanogen) to fill the empty taxonomy slot.
+- Add pollen grain, stomata guard cells for plant-kingdom completeness.
+- Add centriole + lysosome + Golgi + nucleus as standalone organelles.
+- Add prion as another acellular entity (beyond viruses).
+- Localised cell-specific strings (summary, facts) in Bahasa Indonesia via `label_id`/`summary_id` keys in `cells.json`.

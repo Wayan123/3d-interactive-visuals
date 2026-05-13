@@ -1,6 +1,6 @@
 # Cell Architecture Studio 3D
 
-> Local 3D explorer for **16 biological specimens** — tissue cells, bacteria, **5 viruses** (SARS-CoV-2, Bacteriophage T4, HIV, Influenza A, Adenovirus), red blood cell, and standalone organelles. 100 % procedural Three.js. Backend Python standard library only. Dark / Light / System theme. English + Bahasa Indonesia. No external 3D model services.
+> Local 3D explorer for **26 biological specimens** — tissue cells, immune cells, blood cells, reproductive cells, bacteria, fungi, protists, **6 viruses** (SARS-CoV-2, Bacteriophage T4, HIV, Influenza A, Adenovirus, Ebola), and standalone organelles. 100 % procedural Three.js. Backend Python standard library only. Dark / Light / System theme. English + Bahasa Indonesia. No external 3D model services.
 
 ![Demo walkthrough](agent-fleet-dashboard/docs/screenshots/demo.gif)
 
@@ -20,12 +20,15 @@ No `pip install`, no `npm install`. Just Python 3.10+ and a browser. Three.js lo
 
 ## What's inside
 
-- **16 specimens** across 6 categories:
+- **26 specimens** across 9 categories:
   - *Tissue cells* (6): Plant, Animal, Neuron, Epithelial, Stem, Muscle
-  - *Specialised* (1): T-cell
-  - *Blood cells* (1): Red Blood Cell (erythrocyte)
-  - *Bacteria* (1): E. coli
-  - *Viruses* (5): SARS-CoV-2, Bacteriophage T4, HIV, Influenza A, Adenovirus
+  - *Immune cells* (4): T-cell, B-cell, Macrophage, Neutrophil
+  - *Blood cells* (2): Red Blood Cell, Platelet
+  - *Reproductive cells* (1): Spermatozoon
+  - *Bacteria* (2): E. coli, Staphylococcus aureus
+  - *Fungi* (1): Yeast (S. cerevisiae)
+  - *Protists* (2): Paramecium, Amoeba
+  - *Viruses* (6): SARS-CoV-2, Bacteriophage T4, HIV, Influenza A, Adenovirus, Ebola
   - *Standalone organelles* (2): Mitochondrion, Ribosome
 - **6 view modes**: Standalone · Microscope · Electron Microscope · **Process** (virus lifecycle) · Atlas · Compare
 - **Read View** with auto-annotated leader-lines + labels per organelle
@@ -43,7 +46,7 @@ No `pip install`, no `npm install`. Just Python 3.10+ and a browser. Three.js lo
 
 ![Landing](agent-fleet-dashboard/docs/screenshots/01-landing.png)
 
-### Atlas — all 16 specimens at once
+### Atlas — all 26 specimens at once
 
 ![Atlas](agent-fleet-dashboard/docs/screenshots/02-atlas.png)
 
@@ -82,6 +85,38 @@ No `pip install`, no `npm install`. Just Python 3.10+ and a browser. Three.js lo
 ### Settings — Theme, Language, autoplay, bloom
 
 ![Settings](agent-fleet-dashboard/docs/screenshots/15-settings-panel.png)
+
+### Immune cells showcase — Neutrophil (multilobed PMN)
+
+![Neutrophil](agent-fleet-dashboard/docs/screenshots/16-neutrophil.png)
+
+### Macrophage — large tissue phagocyte with pseudopodia
+
+![Macrophage](agent-fleet-dashboard/docs/screenshots/18-macrophage.png)
+
+### Staphylococcus aureus — grape-cluster Gram-positive cocci
+
+![Staph](agent-fleet-dashboard/docs/screenshots/24-staphylococcus.png)
+
+### Yeast (S. cerevisiae) — eukaryote with budding daughter
+
+![Yeast](agent-fleet-dashboard/docs/screenshots/20-yeast.png)
+
+### Paramecium — ciliated protozoan
+
+![Paramecium](agent-fleet-dashboard/docs/screenshots/21-paramecium.png)
+
+### Amoeba — shape-shifting protozoan with pseudopods
+
+![Amoeba](agent-fleet-dashboard/docs/screenshots/22-amoeba.png)
+
+### Spermatozoon — head + midpiece + flagellum
+
+![Sperm](agent-fleet-dashboard/docs/screenshots/23-sperm.png)
+
+### Ebola virus — filamentous negative-sense RNA virus
+
+![Ebola](agent-fleet-dashboard/docs/screenshots/25-ebola.png)
 
 ## Repository layout
 

@@ -215,8 +215,10 @@ export class BioScene {
       const bbox = new THREE.Box3().setFromObject(group);
       const sizeVec = new THREE.Vector3();
       bbox.getSize(sizeVec);
-      const footprint = Math.max(sizeVec.x, sizeVec.z) * 0.55 + 0.18;
-      const heightOffset = sizeVec.y * 0.5 + 0.2;
+      // Use the smaller-of-XZ to keep elongated cells' status rings visually
+      // sensible (sperm/paramecium/ebola/muscle have long bbox along one axis).
+      const footprint = Math.min(1.9, Math.max(sizeVec.x, sizeVec.z) * 0.5 + 0.2);
+      const heightOffset = Math.min(1.5, sizeVec.y * 0.5 + 0.2);
 
       group.position.copy(origin);
 
@@ -601,8 +603,20 @@ export class BioScene {
   _focusOnSelected() {
     const entry = this.cells.get(this.selectedId);
     if (!entry) return;
-    const target = new this.THREE.Vector3(0, 0, 0);
-    const r = (entry.footprint || 1) * 3.4;
+    // Target the actual bbox center in case the group's geometry is not
+    // centred on origin (e.g. sperm has head at +x, flagellum at -x).
+    const tempPos = entry.group.position.clone();
+    entry.group.position.set(0, 0, 0);
+    entry.group.updateMatrixWorld(true);
+    const bbox = new this.THREE.Box3().setFromObject(entry.group);
+    const center = new this.THREE.Vector3();
+    bbox.getCenter(center);
+    entry.group.position.copy(tempPos);
+    const target = center;
+    const size = new this.THREE.Vector3();
+    bbox.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z, entry.footprint || 1);
+    const r = maxDim * 1.35;
     const camDir = new this.THREE.Vector3(0.5, 0.4, 1.0).normalize();
     const destCam = target.clone().addScaledVector(camDir, r);
     this._tweenCamera(destCam, target, 700);

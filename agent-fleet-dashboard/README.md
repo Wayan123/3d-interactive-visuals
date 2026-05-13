@@ -1,6 +1,6 @@
 # Cell Architecture Studio — app
 
-> Local 3D explorer untuk **16 specimen biologi**. 3 tema (Dark / Light / System), bilingual English + Bahasa Indonesia, **5 top-bar panels** (Gallery / Library / Recents / Manual / Settings) termasuk **in-app User Manual bilingual**. 100 % procedural Three.js. Backend Python stdlib only.
+> Local 3D explorer untuk **26 specimen biologi**. 3 tema (Dark / Light / System), bilingual English + Bahasa Indonesia, **5 top-bar panels** (Gallery / Library / Recents / Manual / Settings) termasuk **in-app User Manual bilingual**. 100 % procedural Three.js. Backend Python stdlib only.
 
 ```text
 http://127.0.0.1:8877/
@@ -12,7 +12,7 @@ http://127.0.0.1:8877/
 
 ## Fitur lengkap
 
-- **16 specimens** \(6 tissue + 1 immune + 1 blood + 1 bacteria + 5 viruses + 2 organelles\).
+- **26 specimens** di 9 kategori (tissue + immune + blood + reproductive + bacteria + fungi + protists + viruses + organelles).
 - **6 view modes**: Standalone · Microscope · Electron Microscope · **Process** (virus lifecycle) · Atlas · Compare.
 - **5 top-bar panels**: Gallery, Library (with search), Recents (localStorage), **Manual** (bilingual 11 sections), Settings.
 - **Read View** dengan dashed leader-lines + label per organel.
@@ -26,16 +26,19 @@ http://127.0.0.1:8877/
 ## Inventory
 
 ```text
-16 cells across 6 categories:
+26 cells across 9 categories:
   Tissue cells (6):       plant-cell, animal-cell, neuron, epithelial, stem, muscle
-  Specialised (1):        tcell
-  Blood cells (1):        erythrocyte
-  Bacteria (1):           ecoli
-  Viruses (5):            virus (SARS-CoV-2), bacteriophage (T4), hiv, influenza, adenovirus
+  Immune cells (4):       tcell, bcell, macrophage, neutrophil
+  Blood cells (2):        erythrocyte, platelet
+  Reproductive (1):       sperm
+  Bacteria (2):           ecoli, staph
+  Fungi (1):              yeast
+  Protists (2):           paramecium, amoeba
+  Viruses (6):            virus (SARS-CoV-2), bacteriophage, hiv, influenza, adenovirus, ebola
   Standalone organelles:  mitochondrion, ribosome
 ```
 
-5 virus cells each carry a 5-stage **lifecycle** (`cells.json` → `cells[].lifecycle`): Attachment, Entry, Replication, Assembly, Release.
+6 virus cells each carry a 5-stage **lifecycle** (`cells.json` → `cells[].lifecycle`): Attachment, Entry, Replication, Assembly, Release.
 
 ## Deep-link parameters
 
@@ -161,6 +164,7 @@ agent-fleet-dashboard/
 
 ## Changelog ringkas
 
+- **v0.7** — Added 10 new specimens (neutrophil, B-cell, macrophage, platelet, yeast, paramecium, amoeba, sperm, staph aureus, ebola). 3 new categories (Immune cells, Fungi, Protists). Renamed Specialised → Immune cells (4 cells). Added Reproductive cells category. Ebola also has 5-stage lifecycle. Total **26 specimens** in 9 categories. Camera now targets bbox center; status ring size capped for elongated cells.
 - **v0.6** — In-app User Manual (bilingual, 11 sections). Demo GIF + 15 curated screenshots. Privacy-first defaults: service probes + tmux session exposure now opt-in via env var. Published to GitHub.
 - **v0.5** — 4 functional top-bar panels (Gallery, Library, Recents, Settings). 3 themes. Bilingual en + id. localStorage persistence.
 - **v0.4** — 4 new viruses + RBC. Process view dengan 5-stage virus lifecycle. Section view. Hover tooltips. Total 16 specimens.

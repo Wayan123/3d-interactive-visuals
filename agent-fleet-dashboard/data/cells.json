@@ -6,10 +6,13 @@
   "accent": "#00d4aa",
   "categories": [
     { "id": "tissue", "label": "Tissue cells", "cells": ["plant-cell", "animal-cell", "neuron", "epithelial", "stem", "muscle"] },
-    { "id": "specialised", "label": "Specialised", "cells": ["tcell"] },
-    { "id": "blood", "label": "Blood cells", "cells": ["erythrocyte"] },
-    { "id": "bacteria", "label": "Bacteria", "cells": ["ecoli"] },
-    { "id": "viruses", "label": "Viruses", "cells": ["virus", "bacteriophage", "hiv", "influenza", "adenovirus"] },
+    { "id": "immune", "label": "Immune cells", "cells": ["tcell", "bcell", "macrophage", "neutrophil"] },
+    { "id": "blood", "label": "Blood cells", "cells": ["erythrocyte", "platelet"] },
+    { "id": "reproductive", "label": "Reproductive cells", "cells": ["sperm"] },
+    { "id": "bacteria", "label": "Bacteria", "cells": ["ecoli", "staph"] },
+    { "id": "fungi", "label": "Fungi", "cells": ["yeast"] },
+    { "id": "protists", "label": "Protists", "cells": ["paramecium", "amoeba"] },
+    { "id": "viruses", "label": "Viruses", "cells": ["virus", "bacteriophage", "hiv", "influenza", "adenovirus", "ebola"] },
     { "id": "organelle", "label": "Standalone organelles", "cells": ["mitochondrion", "ribosome"] }
   ],
   "taxonomyTree": {
@@ -18,19 +21,19 @@
       {
         "label": "Cellular",
         "children": [
-          { "label": "Bacteria", "cellIds": ["ecoli"] },
+          { "label": "Bacteria", "cellIds": ["ecoli", "staph"] },
           { "label": "Archaea", "cellIds": [] },
           {
             "label": "Eukarya",
             "children": [
-              { "label": "Protista", "cellIds": [] },
-              { "label": "Fungi", "cellIds": [] },
+              { "label": "Protista", "cellIds": ["paramecium", "amoeba"] },
+              { "label": "Fungi", "cellIds": ["yeast"] },
               { "label": "Plantae", "cellIds": ["plant-cell"] },
               {
                 "label": "Animalia",
                 "children": [
                   { "label": "Generic / cultured", "cellIds": ["animal-cell", "stem"] },
-                  { "label": "Blood (erythrocyte)", "cellIds": ["erythrocyte"] },
+                  { "label": "Blood cells", "cellIds": ["erythrocyte", "platelet"] },
                   {
                     "label": "Tissue cells",
                     "children": [
@@ -40,7 +43,16 @@
                       { "label": "Muscle (myocyte)", "cellIds": ["muscle"] }
                     ]
                   },
-                  { "label": "Immune (T-cell)", "cellIds": ["tcell"] }
+                  {
+                    "label": "Immune cells",
+                    "children": [
+                      { "label": "T-cell", "cellIds": ["tcell"] },
+                      { "label": "B-cell", "cellIds": ["bcell"] },
+                      { "label": "Macrophage", "cellIds": ["macrophage"] },
+                      { "label": "Neutrophil", "cellIds": ["neutrophil"] }
+                    ]
+                  },
+                  { "label": "Reproductive", "cellIds": ["sperm"] }
                 ]
               }
             ]
@@ -57,7 +69,8 @@
               { "label": "Caudovirales (T4 phage)", "cellIds": ["bacteriophage"] },
               { "label": "Retroviridae (HIV)", "cellIds": ["hiv"] },
               { "label": "Orthomyxoviridae (Influenza)", "cellIds": ["influenza"] },
-              { "label": "Adenoviridae (Adenovirus)", "cellIds": ["adenovirus"] }
+              { "label": "Adenoviridae (Adenovirus)", "cellIds": ["adenovirus"] },
+              { "label": "Filoviridae (Ebola)", "cellIds": ["ebola"] }
             ]
           }
         ]
@@ -270,8 +283,8 @@
       "label": "T-cell",
       "kingdom": "Animalia",
       "type": "immune-lymphocyte",
-      "category": "specialised",
-      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Immune (T-cell)"],
+      "category": "immune",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Immune cells", "T-cell"],
       "atlasPosition": [2.1, 0.0, -3.6],
       "scale": 0.9,
       "size": "7-12 µm",
@@ -301,7 +314,7 @@
       "label": "E. coli",
       "kingdom": "Bacteria",
       "type": "prokaryote",
-      "category": "prokaryote",
+      "category": "bacteria",
       "taxonomy": ["Life", "Cellular", "Bacteria"],
       "atlasPosition": [-4.2, 0.0, 0.0],
       "scale": 0.95,
@@ -542,6 +555,319 @@
       ],
       "cad": { "source": "cad_source/erythrocyte.py", "outputs": ["STEP", "GLB"], "prompt": "Biconcave disc red blood cell with central depression on both sides, surface antigen pattern, internal hemoglobin grain." },
       "geometry": { "builder": "buildErythrocyte", "params": { "radius": 1.0, "thickness": 0.32, "indent": 0.5 } }
+    },
+    {
+      "id": "platelet",
+      "label": "Platelet",
+      "kingdom": "Animalia",
+      "type": "thrombocyte",
+      "category": "blood",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Blood cells"],
+      "atlasPosition": [4.3, -0.6, 0.8],
+      "scale": 0.8,
+      "size": "2-3 µm",
+      "accent": "#ff9f7b",
+      "status": "online",
+      "summary": "Anucleate cell fragment of megakaryocyte origin. Initiates clotting at wound sites.",
+      "funFact": "A single megakaryocyte can shed 1,000-3,000 platelets in its lifetime, and your body makes ~10^11 platelets every day.",
+      "facts": [
+        "Biconvex disc shape; becomes star-like when activated.",
+        "No nucleus — just a cytoskeleton + granule fragment of megakaryocyte cytoplasm.",
+        "Alpha-granules carry clotting factors; dense-granules carry ADP/Ca²⁺.",
+        "Lifespan ~7-10 days in circulation."
+      ],
+      "stats": { "complexity": 2, "components": 3, "lifespanDays": 9 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "flexible biconvex envelope", "color": "#ff9f7b", "size": "2-3 µm disc", "fact": "Sheds microparticles during activation." },
+        { "id": "granules", "label": "Alpha + dense granules", "role": "clotting cargo", "color": "#ff5f7a", "size": "200-500 nm", "fact": "Release ADP + serotonin to recruit more platelets." },
+        { "id": "microtubules", "label": "Marginal microtubule band", "role": "disc shape scaffold", "color": "#d7fff6", "size": "circumferential", "fact": "Maintains the resting disc shape; rearranges on activation." }
+      ],
+      "cad": { "source": "cad_source/platelet.py", "outputs": ["STEP", "GLB"], "prompt": "Small biconvex discoid platelet with marginal microtubule ring and scattered alpha + dense granules." },
+      "geometry": { "builder": "buildPlatelet", "params": { "radius": 0.55, "thickness": 0.18, "granuleCount": 16 } }
+    },
+    {
+      "id": "bcell",
+      "label": "B-cell",
+      "kingdom": "Animalia",
+      "type": "immune-lymphocyte",
+      "category": "immune",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Immune cells", "B-cell"],
+      "atlasPosition": [3.6, -0.2, -2.4],
+      "scale": 0.92,
+      "size": "7-10 µm",
+      "accent": "#89c9ff",
+      "status": "online",
+      "summary": "Antibody-producing lymphocyte that recognises intact antigens through its B-cell receptor (BCR).",
+      "funFact": "Each B-cell has about 100,000 identical BCRs on its surface, all with a single unique antigen specificity.",
+      "facts": [
+        "BCR is a membrane-bound antibody (Y-shaped immunoglobulin).",
+        "Upon activation, differentiates into plasma cells that secrete free antibodies.",
+        "Memory B-cells patrol for years after infection.",
+        "Class-switch recombination changes antibody isotype (IgM → IgG/IgA/IgE)."
+      ],
+      "stats": { "complexity": 4, "components": 4, "bcrPerCell": 100000 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "barrier + antigen contact", "color": "#89c9ff", "size": "8 nm", "fact": "Forms immunological synapse with antigen-presenting cells." },
+        { "id": "nucleus", "label": "Large round nucleus", "role": "DNA + V(D)J recombination", "color": "#9a7bff", "size": "~6 µm", "fact": "Somatic hypermutation rewrites antibody genes here." },
+        { "id": "bcr", "label": "B-cell receptors (BCR)", "role": "antigen recognition", "color": "#ffbd4e", "size": "~10 nm Y-shape", "fact": "Membrane-bound antibody; surrounded by CD79a/b signal chains." },
+        { "id": "mitochondria", "label": "Mitochondria", "role": "ATP", "color": "#ffbd4e", "size": "0.5-3 µm", "fact": "Ramped up when cells become antibody-secreting plasma cells." }
+      ],
+      "cad": { "source": "cad_source/bcell.py", "outputs": ["STEP", "GLB"], "prompt": "Lymphocyte with smooth membrane, large round nucleus, ~50 Y-shaped BCR receptors on surface, few mitochondria." },
+      "geometry": { "builder": "buildBCell", "params": { "radius": 0.8, "nucleusRadius": 0.58, "bcrCount": 50 } }
+    },
+    {
+      "id": "macrophage",
+      "label": "Macrophage",
+      "kingdom": "Animalia",
+      "type": "immune-phagocyte",
+      "category": "immune",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Immune cells", "Macrophage"],
+      "atlasPosition": [-3.6, -0.4, -2.4],
+      "scale": 1.0,
+      "size": "20-30 µm",
+      "accent": "#9a7bff",
+      "status": "online",
+      "summary": "Large tissue-resident phagocyte that engulfs pathogens and debris and presents antigens to T-cells.",
+      "funFact": "A single macrophage can engulf over 100 bacteria in its lifetime and lives for months to years in tissue.",
+      "facts": [
+        "Derived from blood monocytes that settle into tissues.",
+        "Engulfs pathogens by phagocytosis → phagosome → phagolysosome.",
+        "Presents antigens on MHC class II to CD4+ helper T-cells.",
+        "Tissue-specific names: Kupffer cells (liver), microglia (brain), alveolar macrophages (lung), osteoclasts (bone)."
+      ],
+      "stats": { "complexity": 5, "components": 5, "lifespanMonths": 6 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "flexible phagocytic surface", "color": "#9a7bff", "size": "irregular", "fact": "Reshapes dynamically during engulfment." },
+        { "id": "nucleus", "label": "Kidney-bean nucleus", "role": "DNA", "color": "#9a7bff", "size": "~8 µm", "fact": "Distinctive bean shape vs other leukocytes." },
+        { "id": "pseudopodia", "label": "Pseudopodia", "role": "engulfment arms", "color": "#b59bff", "size": "1-3 µm", "fact": "Actin polymerisation drives extension around prey." },
+        { "id": "phagosomes", "label": "Phagosomes", "role": "engulfed targets", "color": "#89c9ff", "size": "0.5-2 µm", "fact": "Fuse with lysosomes to digest contents." },
+        { "id": "lysosomes", "label": "Lysosomes", "role": "acidic digestion", "color": "#ff6ea8", "size": "~0.5 µm", "fact": "Contain 50+ hydrolytic enzymes active at pH 4.5." }
+      ],
+      "cad": { "source": "cad_source/macrophage.py", "outputs": ["STEP", "GLB"], "prompt": "Large irregular macrophage with lobed pseudopodia, kidney-bean nucleus, multiple phagosomes + lysosomes inside." },
+      "geometry": { "builder": "buildMacrophage", "params": { "radius": 1.1, "pseudopodCount": 7, "vacuoleCount": 4 } }
+    },
+    {
+      "id": "neutrophil",
+      "label": "Neutrophil",
+      "kingdom": "Animalia",
+      "type": "immune-granulocyte",
+      "category": "immune",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Immune cells", "Neutrophil"],
+      "atlasPosition": [-3.6, 0.6, 2.4],
+      "scale": 0.95,
+      "size": "10-12 µm",
+      "accent": "#ffbd4e",
+      "status": "online",
+      "summary": "Most abundant white blood cell — first responder to bacterial infection. Characteristic multilobed nucleus.",
+      "funFact": "Neutrophils can release their own DNA as sticky 'NETs' (Neutrophil Extracellular Traps) to ensnare bacteria.",
+      "facts": [
+        "~60% of circulating leukocytes are neutrophils.",
+        "Polymorphonuclear (PMN) — nucleus has 3-5 connected lobes.",
+        "Kill by phagocytosis, degranulation, and NETosis.",
+        "Short half-life (~8 hours) in blood; bone marrow makes 10^11 per day."
+      ],
+      "stats": { "complexity": 4, "components": 4, "halfLifeHours": 8 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "chemotaxis + phagocytosis", "color": "#ffbd4e", "size": "irregular", "fact": "Has receptors for chemokines like IL-8 to find infection sites." },
+        { "id": "nucleusLobes", "label": "Multilobed nucleus", "role": "DNA in 3-5 lobes", "color": "#9a7bff", "size": "3-5 lobes", "fact": "Lobed shape helps squeeze through tight tissue gaps." },
+        { "id": "granules", "label": "Granules", "role": "antimicrobial cargo", "color": "#ff8a4c", "size": "0.1-0.5 µm", "fact": "Contain myeloperoxidase, defensins, elastase, lysozyme." },
+        { "id": "pseudopodia", "label": "Pseudopodia", "role": "migration + engulfment", "color": "#ffe2b0", "size": "1-2 µm", "fact": "Drive chemotactic migration up cytokine gradients." }
+      ],
+      "cad": { "source": "cad_source/neutrophil.py", "outputs": ["STEP", "GLB"], "prompt": "PMN neutrophil with 4-lobed nucleus connected by thin strands, ~50 granules, surface pseudopod bulges." },
+      "geometry": { "builder": "buildNeutrophil", "params": { "radius": 0.85, "lobeCount": 4, "granuleCount": 50, "pseudopodCount": 4 } }
+    },
+    {
+      "id": "sperm",
+      "label": "Spermatozoon",
+      "kingdom": "Animalia",
+      "type": "reproductive",
+      "category": "reproductive",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Reproductive"],
+      "atlasPosition": [0.0, -2.3, 0.0],
+      "scale": 0.9,
+      "size": "head 5 µm, total 50 µm",
+      "accent": "#6eefff",
+      "status": "online",
+      "summary": "Motile male gamete with condensed-DNA head, acrosome cap, mitochondrial midpiece, and a long flagellum.",
+      "funFact": "Mammalian sperm swim ~50-100 body lengths per second — and the entire human reproductive tract is only ~20 cm.",
+      "facts": [
+        "Haploid (23 chromosomes in humans).",
+        "Acrosome cap releases enzymes that drill through the egg's zona pellucida.",
+        "Midpiece is packed with mitochondria that power the tail.",
+        "Flagellum beats in a helical wave at ~10 Hz."
+      ],
+      "stats": { "complexity": 4, "components": 5, "swimBeatsPerSec": 10 },
+      "components": [
+        { "id": "head", "label": "Head", "role": "flattened ovoid with nucleus + acrosome", "color": "#7dfce0", "size": "~5 µm", "fact": "Pointed shape streamlines swimming." },
+        { "id": "acrosome", "label": "Acrosome cap", "role": "egg-penetrating enzymes", "color": "#ffbd4e", "size": "covers anterior 2/3", "fact": "Hyaluronidase + acrosin digest zona pellucida." },
+        { "id": "nucleus", "label": "Condensed nucleus", "role": "haploid DNA", "color": "#9a7bff", "size": "highly compacted", "fact": "DNA packed with protamines (10x denser than histones)." },
+        { "id": "midpiece", "label": "Midpiece", "role": "mitochondrial energy plant", "color": "#ffbd4e", "size": "~5 µm", "fact": "Helical spiral of mitochondria wrapping the axoneme." },
+        { "id": "flagellum", "label": "Flagellum (tail)", "role": "propulsion", "color": "#6eefff", "size": "~40 µm", "fact": "Axoneme is a 9+2 microtubule bundle driven by dynein." }
+      ],
+      "cad": { "source": "cad_source/sperm.py", "outputs": ["STEP", "GLB"], "prompt": "Human spermatozoon with pointed ovoid head + acrosome cap + midpiece mitochondrial spiral + long whip flagellum." },
+      "geometry": { "builder": "buildSperm", "params": { "headLength": 0.45, "headWidth": 0.18, "tailLength": 2.4 } }
+    },
+    {
+      "id": "staph",
+      "label": "Staphylococcus aureus",
+      "kingdom": "Bacteria",
+      "type": "gram-positive-cocci",
+      "category": "bacteria",
+      "taxonomy": ["Life", "Cellular", "Bacteria"],
+      "atlasPosition": [-4.3, 0.2, -0.8],
+      "scale": 0.9,
+      "size": "~1 µm per coccus",
+      "accent": "#ffbd4e",
+      "status": "offline",
+      "summary": "Gram-positive cocci that grow in grape-like clusters. Common skin commensal and major hospital pathogen.",
+      "funFact": "The name Staphylococcus comes from Greek staphylē = 'bunch of grapes' — because of the distinctive cluster morphology.",
+      "facts": [
+        "Gram-positive — thick peptidoglycan wall, no outer membrane.",
+        "Divides in multiple planes, producing irregular grape-like clusters.",
+        "S. aureus produces coagulase, toxins (TSST-1, PVL), and enterotoxins.",
+        "MRSA = methicillin-resistant S. aureus — a major nosocomial threat."
+      ],
+      "stats": { "complexity": 2, "components": 4, "genomeMb": 2.8 },
+      "components": [
+        { "id": "cocci", "label": "Spherical cocci", "role": "cell bodies", "color": "#ffbd4e", "size": "~1 µm", "fact": "Divide in multiple planes to form clusters." },
+        { "id": "wall", "label": "Peptidoglycan wall", "role": "rigid Gram+ envelope", "color": "#ff8a4c", "size": "20-80 nm thick", "fact": "Target of penicillin and vancomycin." },
+        { "id": "nucleoids", "label": "Nucleoid", "role": "circular DNA", "color": "#9a7bff", "size": "~2.8 Mb", "fact": "Condensed region, no membrane." },
+        { "id": "ribosomes", "label": "70S ribosomes", "role": "translation", "color": "#d7fff6", "size": "~20 nm", "fact": "Targets of aminoglycosides, tetracyclines, linezolid." }
+      ],
+      "cad": { "source": "cad_source/staph.py", "outputs": ["STEP", "GLB"], "prompt": "Cluster of 9 spherical cocci in a grape-like arrangement, each with peptidoglycan wall ring, nucleoid, and ribosomes." },
+      "geometry": { "builder": "buildStaph", "params": { "coccusRadius": 0.3, "coccusCount": 9 } }
+    },
+    {
+      "id": "yeast",
+      "label": "Yeast",
+      "kingdom": "Fungi",
+      "type": "fungi",
+      "category": "fungi",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Fungi"],
+      "atlasPosition": [4.3, 1.2, -2.0],
+      "scale": 0.9,
+      "size": "5-10 µm",
+      "accent": "#ff9f7b",
+      "status": "online",
+      "summary": "Unicellular fungus (Saccharomyces cerevisiae). Reproduces asexually by budding. Used in baking, brewing, and genetic research.",
+      "funFact": "Yeast was the first eukaryote to have its genome fully sequenced (1996) and remains a workhorse of molecular biology.",
+      "facts": [
+        "Divides by budding — daughter cell grows off the mother and pinches off.",
+        "Has a rigid chitin + glucan cell wall.",
+        "Facultative anaerobe — can respire or ferment (makes ethanol + CO₂).",
+        "~6,000 genes vs ~20,000 in humans; many are orthologous."
+      ],
+      "stats": { "complexity": 4, "components": 6, "genomeMb": 12, "genes": 6000 },
+      "components": [
+        { "id": "cellwall", "label": "Cell wall", "role": "chitin + β-glucan", "color": "#ff9f7b", "size": "100-200 nm", "fact": "Gives yeast its rigid shape." },
+        { "id": "membrane", "label": "Plasma membrane", "role": "ergosterol-rich", "color": "#7dfce0", "size": "8 nm", "fact": "Ergosterol target of antifungals (azoles, polyenes)." },
+        { "id": "nucleus", "label": "Nucleus", "role": "DNA + nucleolus", "color": "#9a7bff", "size": "~1.5 µm", "fact": "Has a persistent nuclear envelope during closed mitosis." },
+        { "id": "vacuole", "label": "Vacuole", "role": "storage + autophagy", "color": "#89c9ff", "size": "large", "fact": "Analogous to plant vacuole / animal lysosome." },
+        { "id": "mitochondria", "label": "Mitochondria", "role": "respiration", "color": "#ffbd4e", "size": "0.5-1 µm", "fact": "Few in fermenting cells, many in respiring cells." },
+        { "id": "bud", "label": "Daughter bud", "role": "asexual reproduction", "color": "#ffbd4e", "size": "up to mother size", "fact": "Nuclear + organelle inheritance happens through a narrow neck." }
+      ],
+      "cad": { "source": "cad_source/yeast.py", "outputs": ["STEP", "GLB"], "prompt": "Spherical yeast cell (S. cerevisiae) with rigid cell wall, inner plasma membrane, nucleus, large vacuole, mitochondria, and a budding daughter cell." },
+      "geometry": { "builder": "buildYeast", "params": { "radius": 0.75, "budRadius": 0.32, "nucleusRadius": 0.25 } }
+    },
+    {
+      "id": "paramecium",
+      "label": "Paramecium",
+      "kingdom": "Protista",
+      "type": "ciliate",
+      "category": "protists",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Protista"],
+      "atlasPosition": [-4.3, 1.2, 2.0],
+      "scale": 0.9,
+      "size": "50-350 µm",
+      "accent": "#5ff0c4",
+      "status": "online",
+      "summary": "Slipper-shaped freshwater ciliate. Swims using thousands of coordinated cilia and has two nuclei.",
+      "funFact": "A single Paramecium beats roughly 10 million cilia × ~10 times per second — yet coordinates them into graceful helical swimming.",
+      "facts": [
+        "Has two nuclei: a large macronucleus (somatic) and a small micronucleus (germline).",
+        "Feeds by sweeping bacteria into an oral groove → cytostome → food vacuoles.",
+        "Contractile vacuoles pump excess water out (freshwater osmoregulation).",
+        "Reproduces asexually by fission but can conjugate to exchange micronuclear DNA."
+      ],
+      "stats": { "complexity": 5, "components": 6, "ciliaApprox": 10000 },
+      "components": [
+        { "id": "membrane", "label": "Pellicle", "role": "tough slipper-shaped envelope", "color": "#5ff0c4", "size": "≈ cell", "fact": "Proteinaceous layer beneath the plasma membrane." },
+        { "id": "cilia", "label": "Cilia carpet", "role": "swimming + feeding", "color": "#7dfce0", "size": "~10 µm each", "fact": "Beat in coordinated metachronal waves across the surface." },
+        { "id": "macronucleus", "label": "Macronucleus", "role": "somatic / transcription", "color": "#9a7bff", "size": "large ellipsoid", "fact": "Highly polyploid; drives all day-to-day gene expression." },
+        { "id": "micronucleus", "label": "Micronucleus", "role": "germline / sex", "color": "#ff9f7b", "size": "small sphere", "fact": "Transmitted during conjugation; diploid." },
+        { "id": "oralGroove", "label": "Oral groove", "role": "food intake", "color": "#ffbd4e", "size": "side indent", "fact": "Cilia sweep food particles into the cytostome." },
+        { "id": "contractileVacuole", "label": "Contractile vacuole", "role": "water balance", "color": "#89c9ff", "size": "pulses every 5-20 s", "fact": "Expels water to counter osmotic influx in freshwater." }
+      ],
+      "cad": { "source": "cad_source/paramecium.py", "outputs": ["STEP", "GLB"], "prompt": "Slipper-shaped paramecium with dense cilia carpet, large macronucleus, small micronucleus, oral groove indentation, and contractile vacuole." },
+      "geometry": { "builder": "buildParamecium", "params": { "length": 2.4, "radius": 0.55, "ciliaCount": 120 } }
+    },
+    {
+      "id": "amoeba",
+      "label": "Amoeba",
+      "kingdom": "Protista",
+      "type": "sarcodine",
+      "category": "protists",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Protista"],
+      "atlasPosition": [4.3, 1.2, 2.0],
+      "scale": 0.95,
+      "size": "200-700 µm",
+      "accent": "#ff6ea8",
+      "status": "online",
+      "summary": "Shape-shifting protozoan that crawls using pseudopods and feeds by engulfing prey.",
+      "funFact": "An amoeba can change its entire body shape in seconds — a single cell doing amoeboid crawling is essentially a one-cell performance of macrophage behaviour.",
+      "facts": [
+        "No fixed shape — cytoplasm flows into pseudopods by sol/gel transitions.",
+        "Engulfs prey by phagocytosis into food vacuoles.",
+        "Contractile vacuole pumps out excess water (freshwater osmoregulation).",
+        "Some species (Entamoeba histolytica, Naegleria fowleri) are pathogens."
+      ],
+      "stats": { "complexity": 4, "components": 5 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "flexible shape-shifting envelope", "color": "#ff6ea8", "size": "irregular", "fact": "No cell wall; reshapes freely." },
+        { "id": "nucleus", "label": "Nucleus", "role": "DNA", "color": "#9a7bff", "size": "~5 µm", "fact": "Often centrally located, with a prominent nucleolus." },
+        { "id": "pseudopods", "label": "Pseudopods", "role": "locomotion + feeding", "color": "#ffbd4e", "size": "variable", "fact": "Actin polymerisation drives extension; myosin retracts." },
+        { "id": "foodVacuole", "label": "Food vacuole", "role": "digesting engulfed prey", "color": "#89c9ff", "size": "5-20 µm", "fact": "Fuses with lysosomes for acidic digestion." },
+        { "id": "contractileVacuole", "label": "Contractile vacuole", "role": "water expulsion", "color": "#7dfce0", "size": "pulsing", "fact": "Characteristic of freshwater protists." }
+      ],
+      "cad": { "source": "cad_source/amoeba.py", "outputs": ["STEP", "GLB"], "prompt": "Irregular amoeba with multiple finger-like pseudopods extending outward, central nucleus, food vacuole, and contractile vacuole." },
+      "geometry": { "builder": "buildAmoeba", "params": { "radius": 0.9, "pseudopodCount": 5 } }
+    },
+    {
+      "id": "ebola",
+      "label": "Ebola virus",
+      "kingdom": "Viruses",
+      "type": "filovirus",
+      "category": "viruses",
+      "taxonomy": ["Life", "Acellular", "Viruses", "Filoviridae (Ebola)"],
+      "atlasPosition": [0.0, 2.3, 0.0],
+      "scale": 0.85,
+      "size": "~80 nm × up to 14 µm",
+      "accent": "#ff5f7a",
+      "status": "offline",
+      "summary": "Filamentous negative-sense RNA virus. Famous for its long, thread-like shape and high-lethality hemorrhagic fever.",
+      "funFact": "Ebola virions are among the longest viruses known — individual particles can stretch up to 14 µm, longer than many bacteria.",
+      "facts": [
+        "Negative-sense single-stranded RNA genome (~19 kb).",
+        "GP surface glycoprotein binds host cell entry factors (NPC1 in endosome).",
+        "VP40 matrix protein drives filament budding from the plasma membrane.",
+        "Natural reservoir is likely fruit bats; outbreaks have high case fatality."
+      ],
+      "stats": { "complexity": 3, "components": 4, "genomeKb": 19 },
+      "components": [
+        { "id": "envelope", "label": "Lipid envelope", "role": "host-derived filament skin", "color": "#7dfce0", "size": "~80 nm diameter", "fact": "Can bend and branch in native virions." },
+        { "id": "spike", "label": "GP glycoprotein", "role": "host entry", "color": "#ff5f7a", "size": "~10 nm spikes", "fact": "Target of approved monoclonal therapies (Inmazeb, Ebanga)." },
+        { "id": "rna", "label": "Helical nucleocapsid", "role": "RNA + NP + L + VP35", "color": "#9a7bff", "size": "~50 nm wide helix", "fact": "One of the longest contiguous RNA helices in the virosphere." },
+        { "id": "vp40", "label": "VP40 matrix", "role": "budding driver", "color": "#ffbd4e", "size": "inner layer", "fact": "Sufficient alone to produce virus-like particles." }
+      ],
+      "lifecycle": [
+        { "id": "attachment", "label": "Attachment", "narration": "GP binds host lectins (DC-SIGN, TIM-1) and is taken in by macropinocytosis.", "durationMin": "seconds" },
+        { "id": "entry", "label": "Entry + uncoating", "narration": "Cathepsins cleave GP inside the endosome; GP binds NPC1; membranes fuse; RNA enters cytoplasm.", "durationMin": "minutes" },
+        { "id": "replication", "label": "Replication", "narration": "Viral L polymerase transcribes genes and copies genome inside cytoplasmic inclusion bodies.", "durationMin": "hours" },
+        { "id": "assembly", "label": "Assembly", "narration": "Nucleocapsid + VP40 + GP traffic to the plasma membrane and assemble into filaments.", "durationMin": "hours" },
+        { "id": "release", "label": "Budding", "narration": "VP40 drives membrane curvature; new filamentous virions bud off and infect neighbouring cells.", "durationMin": "hours" }
+      ],
+      "cad": { "source": "cad_source/ebola.py", "outputs": ["STEP", "GLB"], "prompt": "Filamentous Ebola virion — long curved envelope with GP spikes along the length, internal helical nucleocapsid, VP40 matrix caps." },
+      "geometry": { "builder": "buildEbola", "params": { "length": 2.8, "radius": 0.09, "spikeCount": 30 } }
     },
     {
       "id": "mitochondrion",

@@ -1736,6 +1736,740 @@ export function buildErythrocyte(THREE, params, M) {
   return group;
 }
 
+// --- Builder: Neutrophil (multilobed PMN granulocyte) ---------------------
+
+export function buildNeutrophil(THREE, params, M) {
+  const p = { radius: 0.85, lobeCount: 4, granuleCount: 50, pseudopodCount: 4, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "neutrophil";
+
+  // Membrane with subtle pseudopod bulges
+  const membrane = new THREE.Mesh(noisySphere(THREE, p.radius, 3, 0.08, 3, 71), M.membrane);
+  membrane.userData.componentId = "membrane";
+  group.add(membrane);
+
+  // Multilobed nucleus (characteristic 3-5 connected lobes)
+  const lobeGroup = new THREE.Group();
+  lobeGroup.userData.componentId = "nucleusLobes";
+  for (let i = 0; i < p.lobeCount; i++) {
+    const a = (i / p.lobeCount) * Math.PI * 2;
+    const r = p.radius * 0.35;
+    const x = Math.cos(a) * r;
+    const z = Math.sin(a) * r;
+    const y = Math.sin(i * 1.7) * 0.1;
+    const lobe = new THREE.Mesh(
+      noisySphere(THREE, 0.22, 2, 0.03, 3.5, 11 + i * 7),
+      M.nucleus
+    );
+    lobe.position.set(x, y, z);
+    lobe.userData.componentId = "nucleusLobes";
+    lobeGroup.add(lobe);
+    // thin connector strand to next lobe
+    if (i > 0) {
+      const prev = lobeGroup.children[i - 1];
+      const connector = straightTaperTube(THREE, {
+        start: lobe.position, end: prev.position, startRadius: 0.05, endRadius: 0.05,
+      });
+      if (connector) {
+        connector.material = M.nucleus;
+        connector.userData.componentId = "nucleusLobes";
+        lobeGroup.add(connector);
+      }
+    }
+  }
+  group.add(lobeGroup);
+
+  // Azurophilic + specific granules (instanced)
+  const granGeo = new THREE.IcosahedronGeometry(0.032, 0);
+  const granules = new THREE.InstancedMesh(granGeo, M.granule, p.granuleCount);
+  granules.userData.componentId = "granules";
+  const mat = new THREE.Matrix4();
+  const rnd = mulberry32(41);
+  for (let i = 0; i < p.granuleCount; i++) {
+    const u = fibonacciSphere(p.granuleCount)[i];
+    const r = p.radius * (0.4 + rnd() * 0.45);
+    mat.compose(new THREE.Vector3(u[0] * r, u[1] * r, u[2] * r), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1));
+    granules.setMatrixAt(i, mat);
+  }
+  granules.instanceMatrix.needsUpdate = true;
+  group.add(granules);
+
+  // Pseudopodia (bulging protrusions)
+  const pseudoGroup = new THREE.Group();
+  pseudoGroup.userData.componentId = "pseudopodia";
+  for (let i = 0; i < p.pseudopodCount; i++) {
+    const a = (i / p.pseudopodCount) * Math.PI * 2 + 0.3;
+    const dir = new THREE.Vector3(Math.cos(a), Math.sin(a * 0.7) * 0.3, Math.sin(a)).normalize();
+    const bump = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.22, 1),
+      M.membrane
+    );
+    bump.position.copy(dir.clone().multiplyScalar(p.radius * 0.95));
+    bump.userData.componentId = "pseudopodia";
+    pseudoGroup.add(bump);
+  }
+  group.add(pseudoGroup);
+
+  group.userData.componentMap = {
+    membrane, nucleusLobes: lobeGroup, granules, pseudopodia: pseudoGroup,
+  };
+  return group;
+}
+
+// --- Builder: B-cell (lymphocyte with BCR antibodies) --------------------
+
+export function buildBCell(THREE, params, M) {
+  const p = { radius: 0.8, nucleusRadius: 0.58, bcrCount: 50, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "bcell";
+
+  const membrane = new THREE.Mesh(noisySphere(THREE, p.radius, 3, 0.022, 4, 55), M.membrane);
+  membrane.userData.componentId = "membrane";
+  group.add(membrane);
+
+  const nucleus = new THREE.Mesh(noisySphere(THREE, p.nucleusRadius, 3, 0.025, 4, 77), M.nucleus);
+  nucleus.position.set(0.05, 0.05, 0);
+  nucleus.userData.componentId = "nucleus";
+  group.add(nucleus);
+
+  // BCR (B-cell receptors) — Y-shaped antibody-like using 3-prong
+  const bcrGroup = new THREE.Group();
+  bcrGroup.userData.componentId = "bcr";
+  const pts = fibonacciSphere(p.bcrCount);
+  pts.forEach((u) => {
+    const dir = new THREE.Vector3(u[0], u[1], u[2]).normalize();
+    const base = dir.clone().multiplyScalar(p.radius);
+    const mid = dir.clone().multiplyScalar(p.radius + 0.08);
+    // stalk
+    const stalk = straightTaperTube(THREE, { start: base, end: mid, startRadius: 0.015, endRadius: 0.012 });
+    if (stalk) { stalk.material = M.receptor; stalk.userData.componentId = "bcr"; bcrGroup.add(stalk); }
+    // Y arms
+    const tangent1 = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
+    const tangent2 = new THREE.Vector3().crossVectors(dir, tangent1).normalize();
+    for (let i = 0; i < 2; i++) {
+      const armDir = dir.clone().multiplyScalar(0.6).add(tangent1.clone().multiplyScalar(i === 0 ? 0.5 : -0.5)).normalize();
+      const tip = mid.clone().addScaledVector(armDir, 0.05);
+      const arm = straightTaperTube(THREE, { start: mid, end: tip, startRadius: 0.012, endRadius: 0.008 });
+      if (arm) { arm.material = M.receptor; arm.userData.componentId = "bcr"; bcrGroup.add(arm); }
+    }
+  });
+  group.add(bcrGroup);
+
+  // Mitochondria few
+  const mitoGroup = new THREE.Group();
+  mitoGroup.userData.componentId = "mitochondria";
+  const mitoGeo = new THREE.SphereGeometry(1, 16, 12);
+  mitoGeo.scale(0.18, 0.08, 0.08);
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2 + 0.4;
+    const m = new THREE.Mesh(mitoGeo, M.mito);
+    m.position.set(Math.cos(a) * 0.5, -0.2, Math.sin(a) * 0.5);
+    m.rotation.set(Math.random(), Math.random(), Math.random());
+    m.userData.componentId = "mitochondria";
+    mitoGroup.add(m);
+  }
+  group.add(mitoGroup);
+
+  group.userData.componentMap = { membrane, nucleus, bcr: bcrGroup, mitochondria: mitoGroup };
+  return group;
+}
+
+// --- Builder: Macrophage (large phagocyte with pseudopodia) --------------
+
+export function buildMacrophage(THREE, params, M) {
+  const p = { radius: 1.1, pseudopodCount: 7, vacuoleCount: 4, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "macrophage";
+
+  // Large irregular membrane
+  const membrane = new THREE.Mesh(noisySphere(THREE, p.radius, 4, 0.12, 2.5, 133), M.membrane);
+  membrane.userData.componentId = "membrane";
+  group.add(membrane);
+
+  // Kidney-bean shaped nucleus
+  const nucleus = new THREE.Mesh(noisySphere(THREE, 0.45, 3, 0.05, 3, 144), M.nucleus);
+  nucleus.scale.set(1.3, 0.9, 0.7);
+  nucleus.position.set(0.25, 0.1, 0);
+  nucleus.userData.componentId = "nucleus";
+  group.add(nucleus);
+
+  // Pseudopodia (large extending arms)
+  const pseudoGroup = new THREE.Group();
+  pseudoGroup.userData.componentId = "pseudopodia";
+  for (let i = 0; i < p.pseudopodCount; i++) {
+    const a = (i / p.pseudopodCount) * Math.PI * 2;
+    const dir = new THREE.Vector3(Math.cos(a), Math.sin(i * 1.3) * 0.4, Math.sin(a)).normalize();
+    const tip = dir.clone().multiplyScalar(p.radius * 1.35);
+    const bump = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.28 + Math.random() * 0.1, 2),
+      M.membrane
+    );
+    bump.position.copy(tip);
+    bump.userData.componentId = "pseudopodia";
+    pseudoGroup.add(bump);
+  }
+  group.add(pseudoGroup);
+
+  // Phagocytic vacuoles (large food-filled bubbles inside)
+  const vacGroup = new THREE.Group();
+  vacGroup.userData.componentId = "phagosomes";
+  for (let i = 0; i < p.vacuoleCount; i++) {
+    const a = (i / p.vacuoleCount) * Math.PI * 2 + 1.2;
+    const r = p.radius * 0.45;
+    const vac = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.12 + Math.random() * 0.1, 1),
+      M.vacuole
+    );
+    vac.position.set(Math.cos(a) * r, -0.25, Math.sin(a) * r);
+    vac.userData.componentId = "phagosomes";
+    vacGroup.add(vac);
+  }
+  group.add(vacGroup);
+
+  // Lysosomes (smaller electron-dense spots)
+  const lysGeo = new THREE.IcosahedronGeometry(0.05, 0);
+  const lysosomes = new THREE.InstancedMesh(lysGeo, M.granule, 15);
+  lysosomes.userData.componentId = "lysosomes";
+  const mat4 = new THREE.Matrix4();
+  const rnd = mulberry32(222);
+  for (let i = 0; i < 15; i++) {
+    const u = fibonacciSphere(15)[i];
+    const r = p.radius * 0.55 * (0.6 + rnd() * 0.4);
+    mat4.compose(new THREE.Vector3(u[0] * r, u[1] * r, u[2] * r), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1));
+    lysosomes.setMatrixAt(i, mat4);
+  }
+  lysosomes.instanceMatrix.needsUpdate = true;
+  group.add(lysosomes);
+
+  group.userData.componentMap = {
+    membrane, nucleus, pseudopodia: pseudoGroup, phagosomes: vacGroup, lysosomes,
+  };
+  return group;
+}
+
+// --- Builder: Platelet (thrombocyte, biconvex disc fragment) -------------
+
+export function buildPlatelet(THREE, params, M) {
+  const p = { radius: 0.55, thickness: 0.18, granuleCount: 16, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "platelet";
+
+  // Biconvex disc (flatten sphere)
+  const geo = new THREE.IcosahedronGeometry(p.radius, 3);
+  displaceGeometry(THREE, geo, 0.04, 3.8, 88);
+  geo.scale(1, p.thickness / p.radius, 1);
+  const body = new THREE.Mesh(geo, M.membrane);
+  body.userData.componentId = "membrane";
+  group.add(body);
+
+  // Alpha + dense granules
+  const granGeo = new THREE.IcosahedronGeometry(0.035, 0);
+  const granules = new THREE.InstancedMesh(granGeo, M.granule, p.granuleCount);
+  granules.userData.componentId = "granules";
+  const mat = new THREE.Matrix4();
+  const rnd = mulberry32(77);
+  for (let i = 0; i < p.granuleCount; i++) {
+    const a = rnd() * Math.PI * 2;
+    const r = rnd() * p.radius * 0.75;
+    const x = Math.cos(a) * r;
+    const z = Math.sin(a) * r;
+    const y = (rnd() - 0.5) * p.thickness * 0.7;
+    mat.compose(new THREE.Vector3(x, y, z), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1));
+    granules.setMatrixAt(i, mat);
+  }
+  granules.instanceMatrix.needsUpdate = true;
+  group.add(granules);
+
+  // Marginal microtubule band (ring around the equator)
+  const microring = new THREE.Mesh(
+    new THREE.TorusGeometry(p.radius * 0.88, 0.015, 8, 48),
+    M.axon
+  );
+  microring.rotation.x = Math.PI / 2;
+  microring.userData.componentId = "microtubules";
+  group.add(microring);
+
+  group.userData.componentMap = { membrane: body, granules, microtubules: microring };
+  return group;
+}
+
+// --- Builder: Yeast cell (Saccharomyces, budding) ------------------------
+
+export function buildYeast(THREE, params, M) {
+  const p = { radius: 0.75, budRadius: 0.32, nucleusRadius: 0.25, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "yeast";
+
+  // Rigid cell wall (outer)
+  const wallGroup = new THREE.Group();
+  wallGroup.userData.componentId = "cellwall";
+  const wall = new THREE.Mesh(
+    new THREE.SphereGeometry(p.radius, 36, 24),
+    M.cellwall
+  );
+  wall.userData.componentId = "cellwall";
+  wallGroup.add(wall);
+  group.add(wallGroup);
+
+  // Plasma membrane (inner)
+  const membrane = new THREE.Mesh(
+    new THREE.SphereGeometry(p.radius * 0.93, 32, 20),
+    M.membrane
+  );
+  membrane.userData.componentId = "membrane";
+  group.add(membrane);
+
+  // Nucleus
+  const nucleus = new THREE.Mesh(
+    noisySphere(THREE, p.nucleusRadius, 3, 0.02, 4, 100),
+    M.nucleus
+  );
+  nucleus.position.set(0, 0.05, 0);
+  nucleus.userData.componentId = "nucleus";
+  group.add(nucleus);
+
+  // Vacuole (large, characteristic of yeast)
+  const vacuole = new THREE.Mesh(new THREE.IcosahedronGeometry(0.28, 2), M.vacuole);
+  vacuole.position.set(-0.2, -0.15, 0.15);
+  vacuole.userData.componentId = "vacuole";
+  group.add(vacuole);
+
+  // Mitochondria
+  const mitoGroup = new THREE.Group();
+  mitoGroup.userData.componentId = "mitochondria";
+  const mitoGeo = new THREE.SphereGeometry(1, 16, 12);
+  mitoGeo.scale(0.18, 0.08, 0.08);
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2;
+    const m = new THREE.Mesh(mitoGeo, M.mito);
+    m.position.set(Math.cos(a) * 0.4, 0.25, Math.sin(a) * 0.4);
+    m.rotation.set(Math.random(), Math.random(), Math.random());
+    m.userData.componentId = "mitochondria";
+    mitoGroup.add(m);
+  }
+  group.add(mitoGroup);
+
+  // Budding daughter cell (characteristic of S. cerevisiae)
+  const budGroup = new THREE.Group();
+  budGroup.userData.componentId = "bud";
+  const budDir = new THREE.Vector3(0.8, 0.6, 0).normalize();
+  const budPos = budDir.clone().multiplyScalar(p.radius + p.budRadius * 0.75);
+  const budWall = new THREE.Mesh(
+    new THREE.SphereGeometry(p.budRadius, 28, 18),
+    M.cellwall
+  );
+  budWall.position.copy(budPos);
+  budWall.userData.componentId = "bud";
+  budGroup.add(budWall);
+  const budMembrane = new THREE.Mesh(
+    new THREE.SphereGeometry(p.budRadius * 0.9, 24, 16),
+    M.membrane
+  );
+  budMembrane.position.copy(budPos);
+  budMembrane.userData.componentId = "bud";
+  budGroup.add(budMembrane);
+  group.add(budGroup);
+
+  group.userData.componentMap = {
+    cellwall: wallGroup, membrane, nucleus, vacuole, mitochondria: mitoGroup, bud: budGroup,
+  };
+  return group;
+}
+
+// --- Builder: Paramecium (ciliated protozoan) ----------------------------
+
+export function buildParamecium(THREE, params, M) {
+  const p = { length: 2.4, radius: 0.55, ciliaCount: 120, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "paramecium";
+
+  // Slipper-shaped body (stretched capsule)
+  const bodyGeo = capsuleGeometry(THREE, p.radius, p.length, 32, 16);
+  // Make it slightly asymmetric (front pointier)
+  const pos = bodyGeo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i); // long axis (will rotate)
+    pos.setX(i, x);
+    pos.setY(i, pos.getY(i) * (1 + x / p.length * 0.15));
+    pos.setZ(i, pos.getZ(i) * (1 + x / p.length * 0.1));
+  }
+  pos.needsUpdate = true;
+  bodyGeo.computeVertexNormals();
+  const body = new THREE.Mesh(bodyGeo, M.membrane);
+  body.rotation.z = Math.PI / 2;
+  body.userData.componentId = "membrane";
+  group.add(body);
+
+  // Cilia (dense carpet covering the surface)
+  const ciliaGeo = new THREE.CylinderGeometry(0.008, 0.012, 0.2, 4);
+  const cilia = new THREE.InstancedMesh(ciliaGeo, M.flagellum, p.ciliaCount);
+  cilia.userData.componentId = "cilia";
+  const mat = new THREE.Matrix4();
+  const up = new THREE.Vector3(0, 1, 0);
+  const pts = fibonacciSphere(p.ciliaCount);
+  pts.forEach((u, i) => {
+    // stretch sphere to slipper shape
+    const direction = new THREE.Vector3(u[0] * p.length * 0.5, u[1] * p.radius, u[2] * p.radius).normalize();
+    const posOnSurface = new THREE.Vector3(u[0] * p.length * 0.5, u[1] * p.radius, u[2] * p.radius);
+    // offset cilium a bit along the normal
+    const cilPos = posOnSurface.clone().addScaledVector(direction, 0.1);
+    const q = new THREE.Quaternion().setFromUnitVectors(up, direction);
+    mat.compose(cilPos, q, new THREE.Vector3(1, 1, 1));
+    cilia.setMatrixAt(i, mat);
+  });
+  cilia.instanceMatrix.needsUpdate = true;
+  group.add(cilia);
+
+  // Macronucleus (big somatic nucleus)
+  const macroNucleus = new THREE.Mesh(
+    noisySphere(THREE, 0.35, 3, 0.04, 3, 211),
+    M.nucleus
+  );
+  macroNucleus.position.set(0.2, 0, 0);
+  macroNucleus.scale.set(1.2, 0.8, 0.8);
+  macroNucleus.userData.componentId = "macronucleus";
+  group.add(macroNucleus);
+
+  // Micronucleus (smaller germline nucleus)
+  const microNucleus = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.12, 2),
+    M.nucleolus
+  );
+  microNucleus.position.set(0.3, 0.15, 0.15);
+  microNucleus.userData.componentId = "micronucleus";
+  group.add(microNucleus);
+
+  // Oral groove (indentation on side)
+  const oralGroove = new THREE.Mesh(
+    new THREE.SphereGeometry(0.18, 18, 12, 0, Math.PI),
+    M.mito
+  );
+  oralGroove.position.set(-0.2, -p.radius * 0.75, 0);
+  oralGroove.rotation.x = -Math.PI / 2;
+  oralGroove.userData.componentId = "oralGroove";
+  group.add(oralGroove);
+
+  // Contractile vacuole
+  const contractile = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.15, 2),
+    M.vacuole
+  );
+  contractile.position.set(-0.6, 0.2, 0);
+  contractile.userData.componentId = "contractileVacuole";
+  group.add(contractile);
+
+  group.userData.componentMap = {
+    membrane: body, cilia, macronucleus: macroNucleus, micronucleus: microNucleus,
+    oralGroove, contractileVacuole: contractile,
+  };
+  return group;
+}
+
+// --- Builder: Amoeba (shape-shifting protozoan) --------------------------
+
+export function buildAmoeba(THREE, params, M) {
+  const p = { radius: 0.9, pseudopodCount: 5, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "amoeba";
+
+  // Irregular membrane with heavy noise
+  const membrane = new THREE.Mesh(noisySphere(THREE, p.radius, 4, 0.18, 2, 311), M.membrane);
+  membrane.userData.componentId = "membrane";
+  group.add(membrane);
+
+  // Nucleus
+  const nucleus = new THREE.Mesh(noisySphere(THREE, 0.32, 3, 0.03, 4, 322), M.nucleus);
+  nucleus.position.set(0, 0, 0.1);
+  nucleus.userData.componentId = "nucleus";
+  group.add(nucleus);
+
+  // Pseudopodia (irregular finger-like extensions)
+  const pseudoGroup = new THREE.Group();
+  pseudoGroup.userData.componentId = "pseudopods";
+  for (let i = 0; i < p.pseudopodCount; i++) {
+    const a = (i / p.pseudopodCount) * Math.PI * 2 + Math.random() * 0.3;
+    const dir = new THREE.Vector3(
+      Math.cos(a),
+      Math.sin(i * 1.7) * 0.3,
+      Math.sin(a)
+    ).normalize();
+    const extend = 0.4 + Math.random() * 0.4;
+    const tip = dir.clone().multiplyScalar(p.radius + extend);
+    const finger = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.2 + Math.random() * 0.1, 2),
+      M.membrane
+    );
+    finger.position.copy(tip);
+    finger.userData.componentId = "pseudopods";
+    pseudoGroup.add(finger);
+    // connecting stalk
+    const stalk = straightTaperTube(THREE, {
+      start: dir.clone().multiplyScalar(p.radius * 0.85),
+      end: tip,
+      startRadius: 0.15, endRadius: 0.13,
+    });
+    if (stalk) { stalk.material = M.membrane; stalk.userData.componentId = "pseudopods"; pseudoGroup.add(stalk); }
+  }
+  group.add(pseudoGroup);
+
+  // Food vacuole (containing digested prey)
+  const foodVacuole = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.22, 2),
+    M.vacuole
+  );
+  foodVacuole.position.set(0.3, -0.15, -0.2);
+  foodVacuole.userData.componentId = "foodVacuole";
+  group.add(foodVacuole);
+
+  // Contractile vacuole (regulates water)
+  const contractile = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.16, 2),
+    M.vacuole
+  );
+  contractile.position.set(-0.35, 0.2, 0);
+  contractile.userData.componentId = "contractileVacuole";
+  group.add(contractile);
+
+  group.userData.componentMap = {
+    membrane, nucleus, pseudopods: pseudoGroup, foodVacuole,
+    contractileVacuole: contractile,
+  };
+  return group;
+}
+
+// --- Builder: Spermatozoon (head + midpiece + flagellum) -----------------
+
+export function buildSperm(THREE, params, M) {
+  const p = { headLength: 0.45, headWidth: 0.18, tailLength: 2.4, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "sperm";
+
+  // Head (flattened pointed ovoid)
+  const headGeo = new THREE.SphereGeometry(p.headLength, 24, 16);
+  headGeo.scale(1, p.headWidth / p.headLength, p.headWidth / p.headLength * 0.85);
+  const head = new THREE.Mesh(headGeo, M.membraneOpaque);
+  head.position.x = p.headLength * 0.8;
+  head.userData.componentId = "head";
+  group.add(head);
+
+  // Acrosome cap (front of head, contains enzymes)
+  const acrosome = new THREE.Mesh(
+    new THREE.SphereGeometry(p.headLength * 0.75, 20, 12, 0, Math.PI * 2, 0, Math.PI / 1.4),
+    M.receptor
+  );
+  acrosome.position.x = p.headLength * 1.15;
+  acrosome.rotation.z = -Math.PI / 2;
+  acrosome.scale.set(1, p.headWidth / p.headLength * 0.9, p.headWidth / p.headLength * 0.75);
+  acrosome.userData.componentId = "acrosome";
+  group.add(acrosome);
+
+  // Nucleus (inside head, dark condensed DNA)
+  const nucleus = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(p.headLength * 0.55, 2),
+    M.nucleus
+  );
+  nucleus.position.x = p.headLength * 0.7;
+  nucleus.scale.set(1, p.headWidth / p.headLength * 0.85, p.headWidth / p.headLength * 0.8);
+  nucleus.userData.componentId = "nucleus";
+  group.add(nucleus);
+
+  // Midpiece (mitochondrial spiral wrapping the axoneme)
+  const midpiece = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.055, 0.055, 0.45, 16),
+    M.mito
+  );
+  midpiece.rotation.z = Math.PI / 2;
+  midpiece.position.x = p.headLength * 0.3;
+  midpiece.userData.componentId = "midpiece";
+  group.add(midpiece);
+
+  // Mitochondrial spiral wrapping midpiece
+  const spiralCurve = helixCurve(THREE, {
+    length: 0.45, radius: 0.065, turns: 5,
+    start: [p.headLength * 0.3 - 0.225, 0, 0], axis: [1, 0, 0],
+  });
+  const spiral = new THREE.Mesh(
+    new THREE.TubeGeometry(spiralCurve, 60, 0.018, 6, false),
+    M.mito
+  );
+  spiral.userData.componentId = "midpiece";
+  group.add(spiral);
+
+  // Flagellum (long tail with gentle wave)
+  const flagellumPts = [];
+  for (let i = 0; i <= 40; i++) {
+    const t = i / 40;
+    flagellumPts.push(new THREE.Vector3(
+      -p.tailLength * t,
+      Math.sin(t * Math.PI * 3) * 0.08,
+      Math.sin(t * Math.PI * 1.5) * 0.04
+    ));
+  }
+  const flagellumCurve = new THREE.CatmullRomCurve3(flagellumPts);
+  const flagellum = new THREE.Mesh(
+    new THREE.TubeGeometry(flagellumCurve, 80, 0.022, 6, false),
+    M.flagellum
+  );
+  flagellum.userData.componentId = "flagellum";
+  group.add(flagellum);
+
+  group.userData.componentMap = {
+    head, acrosome, nucleus, midpiece, flagellum,
+  };
+  return group;
+}
+
+// --- Builder: Staphylococcus aureus (grape-cluster cocci) ----------------
+
+export function buildStaph(THREE, params, M) {
+  const p = { coccusRadius: 0.3, coccusCount: 9, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "staph";
+
+  // Cluster of spherical cocci (grape-like)
+  const cluster = new THREE.Group();
+  cluster.userData.componentId = "cocci";
+
+  // Place cocci in an irregular cluster
+  const positions = [
+    [0, 0, 0], [0.55, 0.1, 0], [-0.45, 0.2, 0.15],
+    [0.15, 0.55, -0.1], [-0.15, -0.4, 0.2], [0.5, -0.35, 0.1],
+    [-0.5, -0.15, -0.3], [0.2, 0.3, 0.45], [-0.25, 0.45, 0.3],
+  ];
+  positions.slice(0, p.coccusCount).forEach((pos, i) => {
+    const coccus = new THREE.Mesh(
+      noisySphere(THREE, p.coccusRadius, 2, 0.04, 4, 10 + i * 17),
+      M.cellwall
+    );
+    coccus.position.set(pos[0], pos[1], pos[2]);
+    coccus.userData.componentId = "cocci";
+    cluster.add(coccus);
+    // smaller nucleoid inside each
+    const nucleoid = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(p.coccusRadius * 0.35, 1),
+      M.dna
+    );
+    nucleoid.position.set(pos[0], pos[1], pos[2]);
+    nucleoid.userData.componentId = "nucleoids";
+    cluster.add(nucleoid);
+  });
+  group.add(cluster);
+
+  // Peptidoglycan wall highlights (subtle outer layer shows Gram-positive thick wall)
+  const wallHighlights = new THREE.Group();
+  wallHighlights.userData.componentId = "wall";
+  positions.slice(0, p.coccusCount).forEach((pos, i) => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(p.coccusRadius * 1.05, 0.012, 8, 36),
+      M.mito
+    );
+    ring.position.set(pos[0], pos[1], pos[2]);
+    ring.rotation.x = Math.random() * Math.PI;
+    ring.rotation.y = Math.random() * Math.PI;
+    ring.userData.componentId = "wall";
+    wallHighlights.add(ring);
+  });
+  group.add(wallHighlights);
+
+  // Ribosomes inside (one shared instanced cluster)
+  const ribGeo = new THREE.IcosahedronGeometry(0.025, 0);
+  const ribosomes = new THREE.InstancedMesh(ribGeo, M.ribosome, p.coccusCount * 10);
+  ribosomes.userData.componentId = "ribosomes";
+  const mat4 = new THREE.Matrix4();
+  const rnd = mulberry32(17);
+  let idx = 0;
+  positions.slice(0, p.coccusCount).forEach((pos) => {
+    for (let j = 0; j < 10; j++) {
+      const u = fibonacciSphere(10)[j];
+      const r = p.coccusRadius * 0.6 * (0.3 + rnd() * 0.6);
+      mat4.compose(new THREE.Vector3(pos[0] + u[0] * r, pos[1] + u[1] * r, pos[2] + u[2] * r), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1));
+      ribosomes.setMatrixAt(idx++, mat4);
+    }
+  });
+  ribosomes.instanceMatrix.needsUpdate = true;
+  group.add(ribosomes);
+
+  group.userData.componentMap = {
+    cocci: cluster, wall: wallHighlights, nucleoids: cluster, ribosomes,
+  };
+  return group;
+}
+
+// --- Builder: Ebola virus (filamentous) ----------------------------------
+
+export function buildEbola(THREE, params, M) {
+  const p = { length: 2.8, radius: 0.09, spikeCount: 30, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "ebola";
+
+  // Long filamentous body — slightly curved
+  const bodyPts = [];
+  for (let i = 0; i <= 32; i++) {
+    const t = i / 32;
+    bodyPts.push(new THREE.Vector3(
+      -p.length / 2 + t * p.length,
+      Math.sin(t * Math.PI) * 0.15,  // subtle curve
+      Math.cos(t * Math.PI * 0.5) * 0.05
+    ));
+  }
+  const bodyCurve = new THREE.CatmullRomCurve3(bodyPts);
+  const envelope = new THREE.Mesh(
+    new THREE.TubeGeometry(bodyCurve, 80, p.radius, 16, false),
+    M.membrane
+  );
+  envelope.userData.componentId = "envelope";
+  group.add(envelope);
+
+  // GP (glycoprotein) spikes on surface
+  const spikeGroup = new THREE.Group();
+  spikeGroup.userData.componentId = "spike";
+  for (let i = 0; i < p.spikeCount; i++) {
+    const t = i / p.spikeCount;
+    const pt = bodyCurve.getPointAt(t);
+    const tangent = bodyCurve.getTangentAt(t);
+    // Get a perpendicular direction
+    const up = Math.abs(tangent.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+    const perp = new THREE.Vector3().crossVectors(tangent, up).normalize();
+    // Rotate perpendicular around the tangent to distribute spikes
+    const angle = i * (Math.PI * 2 / p.spikeCount) * 2.7; // golden ratio-ish
+    const q = new THREE.Quaternion().setFromAxisAngle(tangent, angle);
+    perp.applyQuaternion(q);
+    const spikeBase = pt.clone().addScaledVector(perp, p.radius);
+    const spikeTip = pt.clone().addScaledVector(perp, p.radius + 0.08);
+    const stalk = straightTaperTube(THREE, { start: spikeBase, end: spikeTip, startRadius: 0.018, endRadius: 0.028 });
+    if (stalk) { stalk.material = M.spike; stalk.userData.componentId = "spike"; spikeGroup.add(stalk); }
+    const head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.035, 1), M.spike);
+    head.position.copy(spikeTip);
+    head.userData.componentId = "spike";
+    spikeGroup.add(head);
+  }
+  group.add(spikeGroup);
+
+  // Helical nucleoprotein (NP + VP30 + VP35 + L wrap around RNA)
+  const rnaCurve = helixCurve(THREE, {
+    length: p.length * 0.85, radius: p.radius * 0.5, turns: 18,
+    start: [-p.length * 0.42, 0, 0], axis: [1, 0, 0],
+  });
+  const rna = new THREE.Mesh(new THREE.TubeGeometry(rnaCurve, 160, 0.02, 6, false), M.rna);
+  rna.userData.componentId = "rna";
+  group.add(rna);
+
+  // VP40 matrix layer (subtle inner shell at each endpoint — as caps)
+  const capA = new THREE.Mesh(new THREE.IcosahedronGeometry(p.radius * 1.1, 1), M.receptor);
+  capA.position.copy(bodyCurve.getPointAt(0));
+  capA.userData.componentId = "vp40";
+  group.add(capA);
+  const capB = new THREE.Mesh(new THREE.IcosahedronGeometry(p.radius * 1.1, 1), M.receptor);
+  capB.position.copy(bodyCurve.getPointAt(1));
+  capB.userData.componentId = "vp40";
+  group.add(capB);
+
+  group.userData.componentMap = {
+    envelope, spike: spikeGroup, rna, vp40: new THREE.Group().add(capA, capB),
+  };
+  return group;
+}
+
 // --- Registry -------------------------------------------------------------
 
 export const BUILDERS = {
@@ -1755,6 +2489,16 @@ export const BUILDERS = {
   buildInfluenza,
   buildAdenovirus,
   buildErythrocyte,
+  buildNeutrophil,
+  buildBCell,
+  buildMacrophage,
+  buildPlatelet,
+  buildYeast,
+  buildParamecium,
+  buildAmoeba,
+  buildSperm,
+  buildStaph,
+  buildEbola,
 };
 
 export function buildCell(THREE, builderName, params, materials) {
