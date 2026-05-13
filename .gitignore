@@ -1,0 +1,40 @@
+# Windows download security flags
+*:Zone.Identifier
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Backups
+.backup/
+*.bak
+
+# build123d / CAD output (regenerate from source)
+cad_source/out/
+
+# OS
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# tmux + runtime logs
+*.log
+tmux-*.log
+
+# Chrome headless profile dirs
+/tmp/biocell-*/
+/tmp/com.google.Chrome*/
+
+# Large third-party scrape (not needed for app)
+doc_support/

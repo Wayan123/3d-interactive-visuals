@@ -1,0 +1,632 @@
+{
+  "updatedAt": "2026-05-13T08:30:00+07:00",
+  "schemaVersion": 3,
+  "atlasTitle": "Cell Architecture Studio",
+  "atlasSubtitle": "Interactive local explorer for bacteria, cells, organelles",
+  "accent": "#00d4aa",
+  "categories": [
+    { "id": "tissue", "label": "Tissue cells", "cells": ["plant-cell", "animal-cell", "neuron", "epithelial", "stem", "muscle"] },
+    { "id": "specialised", "label": "Specialised", "cells": ["tcell"] },
+    { "id": "blood", "label": "Blood cells", "cells": ["erythrocyte"] },
+    { "id": "bacteria", "label": "Bacteria", "cells": ["ecoli"] },
+    { "id": "viruses", "label": "Viruses", "cells": ["virus", "bacteriophage", "hiv", "influenza", "adenovirus"] },
+    { "id": "organelle", "label": "Standalone organelles", "cells": ["mitochondrion", "ribosome"] }
+  ],
+  "taxonomyTree": {
+    "label": "Life",
+    "children": [
+      {
+        "label": "Cellular",
+        "children": [
+          { "label": "Bacteria", "cellIds": ["ecoli"] },
+          { "label": "Archaea", "cellIds": [] },
+          {
+            "label": "Eukarya",
+            "children": [
+              { "label": "Protista", "cellIds": [] },
+              { "label": "Fungi", "cellIds": [] },
+              { "label": "Plantae", "cellIds": ["plant-cell"] },
+              {
+                "label": "Animalia",
+                "children": [
+                  { "label": "Generic / cultured", "cellIds": ["animal-cell", "stem"] },
+                  { "label": "Blood (erythrocyte)", "cellIds": ["erythrocyte"] },
+                  {
+                    "label": "Tissue cells",
+                    "children": [
+                      { "label": "Epithelial", "cellIds": ["epithelial"] },
+                      { "label": "Connective", "cellIds": [] },
+                      { "label": "Nervous (neuron)", "cellIds": ["neuron"] },
+                      { "label": "Muscle (myocyte)", "cellIds": ["muscle"] }
+                    ]
+                  },
+                  { "label": "Immune (T-cell)", "cellIds": ["tcell"] }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Acellular",
+        "children": [
+          {
+            "label": "Viruses",
+            "children": [
+              { "label": "Coronaviridae (SARS-CoV-2)", "cellIds": ["virus"] },
+              { "label": "Caudovirales (T4 phage)", "cellIds": ["bacteriophage"] },
+              { "label": "Retroviridae (HIV)", "cellIds": ["hiv"] },
+              { "label": "Orthomyxoviridae (Influenza)", "cellIds": ["influenza"] },
+              { "label": "Adenoviridae (Adenovirus)", "cellIds": ["adenovirus"] }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Subcellular",
+        "children": [
+          { "label": "Organelles", "cellIds": ["mitochondrion", "ribosome"] }
+        ]
+      }
+    ]
+  },
+  "cells": [
+    {
+      "id": "plant-cell",
+      "label": "Plant Cell",
+      "kingdom": "Plantae",
+      "type": "eukaryote",
+      "category": "tissue",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Plantae"],
+      "atlasPosition": [4.2, 0.0, 0.0],
+      "scale": 0.95,
+      "size": "10-100 µm",
+      "accent": "#9dff8a",
+      "status": "online",
+      "summary": "Plant cell with rigid cell wall, large central vacuole, and chloroplasts.",
+      "funFact": "Central vacuole can occupy up to 80 % of total cell volume and is the main driver of turgor pressure.",
+      "facts": [
+        "Chloroplasts photosynthesise using stacked thylakoid grana.",
+        "Central vacuole can occupy up to 80% of cell volume.",
+        "Cell wall is mainly cellulose microfibrils.",
+        "Plasmodesmata connect neighbouring cells."
+      ],
+      "stats": { "complexity": 5, "components": 7, "genomeMb": 430, "chlorophyllMmol": 30 },
+      "components": [
+        { "id": "cellwall", "label": "Cell wall", "role": "cellulose scaffold", "color": "#9dff8a", "size": "0.1-1 µm thick", "fact": "Cellulose fibrils give plant cell walls roughly the tensile strength of steel by mass." },
+        { "id": "membrane", "label": "Plasma membrane", "role": "transport", "color": "#7dfce0", "size": "8 nm thick", "fact": "Membrane proteins regulate ion flow and signalling." },
+        { "id": "vacuole", "label": "Central vacuole", "role": "turgor + storage", "color": "#89c9ff", "size": "up to 80% volume", "fact": "Stores water, ions, sugars, pigments, and waste." },
+        { "id": "chloroplasts", "label": "Chloroplasts", "role": "photosynthesis", "color": "#38d86b", "size": "5-10 µm", "fact": "Have their own circular DNA from cyanobacterial endosymbiosis." },
+        { "id": "nucleus", "label": "Nucleus", "role": "DNA storage", "color": "#9a7bff", "size": "5-10 µm", "fact": "Contains nucleolus where ribosomes are assembled." },
+        { "id": "mitochondria", "label": "Mitochondria", "role": "ATP", "color": "#ffbd4e", "size": "0.5-3 µm", "fact": "Plants ALSO have mitochondria, not just chloroplasts." },
+        { "id": "ribosomes", "label": "Ribosomes", "role": "translation", "color": "#d7fff6", "size": "20-30 nm", "fact": "Plant cytoplasmic ribosomes are 80S, plastid ribosomes are 70S." }
+      ],
+      "cad": { "source": "cad_source/plant_cell.py", "outputs": ["STEP", "GLB"], "prompt": "Create a stylised plant cell: cubic 2.0 mm rigid cell wall with chamfered corners, inner spherical membrane 1.7 mm, central spherical vacuole 1.2 mm, 6 lens-shaped chloroplasts 0.4 mm major radius placed between wall and vacuole, one 0.45 mm nucleus, 4 mitochondria capsules. Separate named parts. Export STEP and GLB." },
+      "geometry": { "builder": "buildPlantCell", "params": { "boxSize": 2.2, "wallThickness": 0.12, "vacuoleRadius": 0.75, "chloroplastCount": 7, "mitoCount": 5, "nucleusRadius": 0.38 } }
+    },
+    {
+      "id": "animal-cell",
+      "label": "Animal Cell",
+      "kingdom": "Animalia",
+      "type": "eukaryote",
+      "category": "tissue",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Generic / cultured"],
+      "atlasPosition": [0, 0, 0],
+      "scale": 1.05,
+      "size": "10-30 µm",
+      "accent": "#4cd5ff",
+      "status": "online",
+      "summary": "Generic animal eukaryotic cell with membrane, nucleus, ER, Golgi, mitochondria, ribosomes.",
+      "funFact": "A single human cell contains roughly 2 m of DNA folded into a 6 µm nucleus.",
+      "facts": [
+        "Nucleus encloses DNA inside a double membrane with nuclear pores.",
+        "Mitochondria are the ATP powerhouses with their own circular genome.",
+        "Endoplasmic reticulum folds proteins and synthesises lipids.",
+        "Golgi apparatus packages and ships proteins in vesicles."
+      ],
+      "stats": { "complexity": 5, "components": 8, "genomeMb": 3200, "atpPerSec": 1e7 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "barrier / transport", "color": "#7dfce0", "size": "8 nm", "fact": "Each cell has roughly 100 million lipid molecules in its membrane." },
+        { "id": "nucleus", "label": "Nucleus", "role": "DNA storage / transcription", "color": "#9a7bff", "size": "5-10 µm", "fact": "Nuclear pores let mRNA out and ribosomal proteins in selectively." },
+        { "id": "nucleolus", "label": "Nucleolus", "role": "rRNA + ribosome assembly", "color": "#ff9f7b", "size": "0.5-3 µm", "fact": "Disassembles during mitosis and reassembles afterwards." },
+        { "id": "mitochondria", "label": "Mitochondria", "role": "ATP synthesis", "color": "#ffbd4e", "size": "0.5-3 µm", "fact": "You inherit your mitochondria entirely from your mother." },
+        { "id": "er", "label": "Endoplasmic reticulum", "role": "protein + lipid synthesis", "color": "#50e0b7", "size": "10-50 % cytoplasm", "fact": "Rough ER is studded with ribosomes; smooth ER builds lipids." },
+        { "id": "golgi", "label": "Golgi apparatus", "role": "protein packaging", "color": "#ff6ea8", "size": "5-10 cisternae", "fact": "Adds sugar tags to proteins (glycosylation)." },
+        { "id": "ribosomes", "label": "Ribosomes", "role": "protein translation", "color": "#d7fff6", "size": "20-30 nm", "fact": "Each cell has millions of ribosomes; ~10 million in active tissue." },
+        { "id": "cytoskeleton", "label": "Cytoskeleton", "role": "shape + transport rails", "color": "#6eefff", "size": "actin 7 nm, microtub 25 nm", "fact": "Motor proteins (kinesin, dynein) walk along microtubule tracks." }
+      ],
+      "cad": { "source": "cad_source/animal_cell.py", "outputs": ["STEP", "GLB"], "prompt": "Build a stylised animal cell: 14 mm outer spherical membrane, 5 mm nucleus with nucleolus, 8 mitochondria ellipsoids, ER as a twisted tube network, 3 stacked Golgi discs, 40 ribosome microspheres on the ER. Export STEP and GLB." },
+      "geometry": { "builder": "buildAnimalCell", "params": { "radius": 1.4, "nucleusRadius": 0.52, "mitoCount": 8, "ribosomeCount": 60, "erSegments": 128, "golgiStacks": 4 } }
+    },
+    {
+      "id": "neuron",
+      "label": "Neuron",
+      "kingdom": "Animalia",
+      "type": "nervous",
+      "category": "tissue",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Tissue cells", "Nervous (neuron)"],
+      "atlasPosition": [-2.1, 0.0, -3.6],
+      "scale": 0.95,
+      "size": "soma 20 µm, axon up to 1 m",
+      "accent": "#b59bff",
+      "status": "online",
+      "summary": "Excitable cell with dendrites, a single axon, myelin sheath, and synapse terminals.",
+      "funFact": "The longest neurons in your body run from the spinal cord to your toes — over 1 m, but still one continuous cell.",
+      "facts": [
+        "Action potential travels ~100 m/s on myelinated axons.",
+        "A single neuron can form thousands of synaptic contacts.",
+        "Myelin is produced by Schwann cells (PNS) or oligodendrocytes (CNS).",
+        "Ion channels gate Na+ and K+ to propagate depolarisation."
+      ],
+      "stats": { "complexity": 5, "components": 6, "dendriteCount": 7, "axonMm": 1.8 },
+      "components": [
+        { "id": "soma", "label": "Soma", "role": "cell body + nucleus", "color": "#b59bff", "size": "10-25 µm", "fact": "Houses the nucleus and most organelles." },
+        { "id": "dendrites", "label": "Dendrites", "role": "signal inputs", "color": "#7dfce0", "size": "0.5-1 mm", "fact": "Receive thousands of synaptic inputs simultaneously." },
+        { "id": "axon", "label": "Axon", "role": "signal output", "color": "#d7fff6", "size": "up to 1 m", "fact": "Single output cable — branches at the terminal end." },
+        { "id": "myelin", "label": "Myelin sheath", "role": "insulator + saltatory speed", "color": "#ffbd4e", "size": "0.2-1 mm segments", "fact": "Allows action potentials to jump between Nodes of Ranvier." },
+        { "id": "nodes", "label": "Nodes of Ranvier", "role": "ion channel gaps", "color": "#ff6ea8", "size": "1 µm gap", "fact": "Dense Na+ channel concentration regenerates the action potential." },
+        { "id": "terminals", "label": "Synaptic terminals", "role": "neurotransmitter release", "color": "#6eefff", "size": "1-2 µm", "fact": "Release neurotransmitters across a 20 nm synaptic cleft." }
+      ],
+      "cad": { "source": "cad_source/neuron.py", "outputs": ["STEP", "STL", "GLB"], "prompt": "Create a stylised neuron with soma sphere, branching dendrites, long axon with myelin segments, and terminal boutons." },
+      "geometry": { "builder": "buildNeuron", "params": { "somaRadius": 0.65, "dendriteCount": 7, "dendriteBranches": 3, "axonLength": 2.6, "myelinSegments": 6, "terminalCount": 5 } }
+    },
+    {
+      "id": "epithelial",
+      "label": "Epithelial Cell",
+      "kingdom": "Animalia",
+      "type": "epithelial",
+      "category": "tissue",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Tissue cells", "Epithelial"],
+      "atlasPosition": [2.4, 0.0, -3.6],
+      "scale": 1.0,
+      "size": "10-25 µm",
+      "accent": "#7dfce0",
+      "status": "online",
+      "summary": "Polarised cuboidal/columnar cell with apical microvilli and tight junctions to neighbours.",
+      "funFact": "Microvilli on intestinal epithelial cells multiply the absorbing surface of your gut about 30 ×.",
+      "facts": [
+        "Polarised: apical (top) microvilli vs basal (bottom) basement membrane.",
+        "Tight junctions seal the gaps between adjacent cells.",
+        "Renew rapidly — gut epithelium turns over every 4-5 days.",
+        "Major barrier and absorption surface in skin, gut, lung, kidney."
+      ],
+      "stats": { "complexity": 4, "components": 6, "microvilliPerCell": 3000 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "polarised barrier", "color": "#7dfce0", "size": "8 nm", "fact": "Apical and basolateral domains have different proteins." },
+        { "id": "microvilli", "label": "Microvilli", "role": "absorbing surface area", "color": "#5ff0c4", "size": "1-2 µm long", "fact": "Each microvillus is supported by an actin filament bundle." },
+        { "id": "junctions", "label": "Tight junctions", "role": "seal between cells", "color": "#ffbd4e", "size": "ring near apex", "fact": "Made of claudins and occludins; selective paracellular barrier." },
+        { "id": "basement", "label": "Basement membrane", "role": "anchor + signal substrate", "color": "#9dff8a", "size": "50-200 nm thick", "fact": "Sheet of collagen IV + laminin holding the epithelium to underlying tissue." },
+        { "id": "nucleus", "label": "Nucleus", "role": "DNA", "color": "#9a7bff", "size": "5-8 µm", "fact": "Usually located near the basal end in columnar cells." },
+        { "id": "mitochondria", "label": "Mitochondria", "role": "ATP for active transport", "color": "#ffbd4e", "size": "0.5-3 µm", "fact": "Heavily concentrated near the basal membrane in transport-active cells." }
+      ],
+      "cad": { "source": "cad_source/epithelial.py", "outputs": ["STEP", "GLB"], "prompt": "Stylised epithelial cell: cuboidal body 1.6 mm tall, microvilli on apical face, basement membrane plate underneath, tight-junction ring near top, basal nucleus." },
+      "geometry": { "builder": "buildEpithelial", "params": { "width": 1.2, "depth": 1.2, "height": 1.6, "microvilliCount": 36, "nucleusRadius": 0.32, "mitoCount": 6 } }
+    },
+    {
+      "id": "stem",
+      "label": "Stem Cell",
+      "kingdom": "Animalia",
+      "type": "stem",
+      "category": "tissue",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Generic / cultured"],
+      "atlasPosition": [3.6, 0.6, 1.8],
+      "scale": 0.95,
+      "size": "10-15 µm",
+      "accent": "#ff9f7b",
+      "status": "online",
+      "summary": "Undifferentiated cell with self-renewal and pluripotent / multipotent potential.",
+      "funFact": "Pluripotent stem cells can give rise to all 200+ cell types in the body.",
+      "facts": [
+        "Self-renew via symmetric division and produce committed daughter cells.",
+        "Express markers like OCT4, SOX2, NANOG (pluripotent) or CD34, CD133 (adult).",
+        "Bone marrow stem cells produce ~10¹¹ blood cells per day.",
+        "Niche signals tightly control whether they self-renew or differentiate."
+      ],
+      "stats": { "complexity": 4, "components": 6, "potency": "pluripotent" },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "barrier", "color": "#7dfce0", "size": "8 nm", "fact": "Carries surface markers used to identify stem cell type." },
+        { "id": "nucleus", "label": "Large nucleus", "role": "open chromatin", "color": "#9a7bff", "size": "8-12 µm", "fact": "Stem cells have proportionally huge nuclei vs cytoplasm." },
+        { "id": "chromatin", "label": "Open chromatin", "role": "transcriptionally permissive", "color": "#ff9f7b", "size": "diffuse", "fact": "Loose chromatin keeps developmental genes accessible." },
+        { "id": "markers", "label": "Surface markers", "role": "CD34/CD133/etc.", "color": "#ffbd4e", "size": "<10 nm", "fact": "Used in flow cytometry to sort stem cells from blood/marrow." },
+        { "id": "daughters", "label": "Daughter buds", "role": "self-renewal motif", "color": "#ff5f7a", "size": "small attached buds", "fact": "Asymmetric division can produce one stem + one differentiated daughter." },
+        { "id": "mitochondria", "label": "Mitochondria", "role": "ATP, metabolic switch", "color": "#ffbd4e", "size": "0.5-3 µm", "fact": "Pluripotent cells favour glycolysis over oxidative phosphorylation." }
+      ],
+      "cad": { "source": "cad_source/stem.py", "outputs": ["STEP", "GLB"], "prompt": "Stylised pluripotent stem cell: 1.4 mm sphere, large 0.85 mm nucleus, scattered chromatin patches, surface marker spikes, 4 small daughter buds at the equator." },
+      "geometry": { "builder": "buildStemCell", "params": { "radius": 0.7, "nucleusRatio": 0.62, "daughterCount": 4, "surfaceMarkerCount": 28 } }
+    },
+    {
+      "id": "muscle",
+      "label": "Muscle Cell",
+      "kingdom": "Animalia",
+      "type": "muscle",
+      "category": "tissue",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Tissue cells", "Muscle (myocyte)"],
+      "atlasPosition": [-3.6, 0.6, 1.8],
+      "scale": 0.85,
+      "size": "10-100 µm × up to 30 cm long",
+      "accent": "#ff6ea8",
+      "status": "online",
+      "summary": "Long multinucleated skeletal myocyte packed with myofibrils and striated sarcomeres.",
+      "funFact": "Skeletal muscle fibres can be over 30 cm long and contain hundreds of nuclei.",
+      "facts": [
+        "Multinucleated — many nuclei sit just under the sarcolemma.",
+        "Sarcomere is the contractile unit; striations come from aligned sarcomeres.",
+        "Myofibrils are bundles of actin + myosin filaments.",
+        "T-tubules carry action potentials deep into the fibre to trigger Ca²⁺ release."
+      ],
+      "stats": { "complexity": 5, "components": 5, "fiberLengthMm": 30, "nucleiPerFiber": 200 },
+      "components": [
+        { "id": "sarcolemma", "label": "Sarcolemma", "role": "muscle plasma membrane", "color": "#7dfce0", "size": "8 nm", "fact": "Has T-tubule invaginations that propagate excitation inward." },
+        { "id": "myofibrils", "label": "Myofibrils", "role": "contractile bundles", "color": "#d7fff6", "size": "1-2 µm diameter", "fact": "Hundreds run end-to-end through each fibre." },
+        { "id": "sarcomeres", "label": "Sarcomere bands", "role": "actin/myosin units", "color": "#ff8a4c", "size": "~2.2 µm at rest", "fact": "Contraction shortens each sarcomere by ~30 %." },
+        { "id": "nuclei", "label": "Peripheral nuclei", "role": "transcription centres", "color": "#9a7bff", "size": "5-8 µm", "fact": "Nuclei sit beneath the sarcolemma so myofibrils have room in the centre." },
+        { "id": "mitochondria", "label": "Mitochondria", "role": "ATP for contraction", "color": "#ffbd4e", "size": "0.5-3 µm", "fact": "Densely packed between myofibrils — endurance fibres have more." }
+      ],
+      "cad": { "source": "cad_source/muscle.py", "outputs": ["STEP", "GLB"], "prompt": "Stylised skeletal muscle cell: capsule 3.6 mm long × 0.42 mm radius, parallel myofibril cylinders, sarcomere band rings, peripheral oblong nuclei, scattered mitochondria between fibrils." },
+      "geometry": { "builder": "buildMuscleCell", "params": { "length": 3.6, "radius": 0.42, "sarcomereCount": 14, "myofibrilCount": 5, "nucleiCount": 5 } }
+    },
+    {
+      "id": "tcell",
+      "label": "T-cell",
+      "kingdom": "Animalia",
+      "type": "immune-lymphocyte",
+      "category": "specialised",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Immune (T-cell)"],
+      "atlasPosition": [2.1, 0.0, -3.6],
+      "scale": 0.9,
+      "size": "7-12 µm",
+      "accent": "#ff6ea8",
+      "status": "online",
+      "summary": "Adaptive immune cell with T-cell receptors, actively patrolling for antigens.",
+      "funFact": "Naive T-cells visit nearly every lymph node in the body roughly once a day.",
+      "facts": [
+        "TCR recognises peptide presented by MHC on target cells.",
+        "CD8+ cytotoxic T-cells release perforin + granzymes.",
+        "Naive T-cells circulate through lymph nodes continuously.",
+        "Memory T-cells give durable adaptive immunity."
+      ],
+      "stats": { "complexity": 4, "components": 5, "receptorsPerCell": 30000 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "barrier", "color": "#ff6ea8", "size": "8 nm", "fact": "Forms an immunological synapse on antigen contact." },
+        { "id": "tcr", "label": "T-cell receptors", "role": "antigen recognition", "color": "#ffbd4e", "size": "~10 nm", "fact": "Each T-cell expresses a single TCR specificity." },
+        { "id": "nucleus", "label": "Large nucleus", "role": "DNA", "color": "#9a7bff", "size": "~5 µm", "fact": "Takes up most of the small T-cell volume." },
+        { "id": "mitochondria", "label": "Mitochondria", "role": "energy", "color": "#ffbd4e", "size": "0.5-3 µm", "fact": "Reposition toward the synapse during target killing." },
+        { "id": "granules", "label": "Cytotoxic granules", "role": "perforin + granzyme", "color": "#ff5f7a", "size": "0.2-0.5 µm", "fact": "Polarise toward the target cell, then release lethal cargo." }
+      ],
+      "cad": { "source": "cad_source/tcell.py", "outputs": ["STEP", "GLB"], "prompt": "Stylised T-cell: 1.0 mm sphere, large nucleus, surface TCR microspikes, internal cytotoxic granules." },
+      "geometry": { "builder": "buildTCell", "params": { "radius": 0.85, "nucleusRadius": 0.52, "receptorCount": 70, "granuleCount": 7, "mitoCount": 4 } }
+    },
+    {
+      "id": "ecoli",
+      "label": "E. coli",
+      "kingdom": "Bacteria",
+      "type": "prokaryote",
+      "category": "prokaryote",
+      "taxonomy": ["Life", "Cellular", "Bacteria"],
+      "atlasPosition": [-4.2, 0.0, 0.0],
+      "scale": 0.95,
+      "size": "2 µm × 0.5 µm",
+      "accent": "#35f59d",
+      "status": "online",
+      "summary": "Classic rod-shaped Gram-negative bacterium with peritrichous flagella.",
+      "funFact": "An E. coli with flagella can swim 20 body lengths per second — relatively faster than a cheetah.",
+      "facts": [
+        "Genome is a single circular chromosome (~4.6 Mb).",
+        "Flagella rotate like propellers at ~300 Hz.",
+        "Divides every ~20 minutes in rich medium.",
+        "Has a pilus (sex pilus) for plasmid conjugation."
+      ],
+      "stats": { "complexity": 3, "components": 5, "genomeKb": 4640, "doublingMinutes": 20 },
+      "components": [
+        { "id": "membrane", "label": "Cell envelope", "role": "outer + inner membrane + wall", "color": "#7dfce0", "size": "30-40 nm", "fact": "Gram-negatives have an extra outer LPS membrane." },
+        { "id": "nucleoid", "label": "Nucleoid", "role": "circular DNA region", "color": "#9a7bff", "size": "1 mb compacted", "fact": "Not enclosed by a membrane — just a tightly supercoiled region." },
+        { "id": "ribosomes", "label": "70S ribosomes", "role": "protein translation", "color": "#d7fff6", "size": "20 nm", "fact": "Smaller than eukaryotic 80S — antibiotics target this difference." },
+        { "id": "flagella", "label": "Flagella", "role": "motility", "color": "#5ff0c4", "size": "5-15 µm long", "fact": "Driven by a proton-motive force rotor — a true biological motor." },
+        { "id": "pili", "label": "Pili", "role": "attachment + conjugation", "color": "#ffbd4e", "size": "1-2 µm", "fact": "Conjugative pili transfer plasmids between bacteria." }
+      ],
+      "cad": { "source": "cad_source/ecoli.py", "outputs": ["STEP", "STL", "GLB"], "prompt": "Stylised E. coli: capsule body, helical flagella, straight pili, twisted nucleoid loop." },
+      "geometry": { "builder": "buildEcoli", "params": { "length": 1.7, "radius": 0.42, "flagellaCount": 4, "flagellaLength": 1.5, "flagellaTurns": 3, "piliCount": 10, "nucleoidLoops": 3 } }
+    },
+    {
+      "id": "virus",
+      "label": "SARS-CoV-2",
+      "kingdom": "Viruses",
+      "type": "enveloped-rna-virus",
+      "category": "viruses",
+      "taxonomy": ["Life", "Acellular", "Viruses", "Coronaviridae (SARS-CoV-2)"],
+      "atlasPosition": [2.1, 0.0, 3.6],
+      "scale": 0.85,
+      "size": "100 nm",
+      "accent": "#ff8a4c",
+      "status": "offline",
+      "summary": "Enveloped positive-sense RNA virus with spike, envelope, membrane, and nucleocapsid proteins.",
+      "funFact": "About 50 SARS-CoV-2 viruses fit across the diameter of a single human red blood cell.",
+      "facts": [
+        "Spike protein binds ACE2 receptor on host cells.",
+        "Genome ~30 kb positive-sense single-stranded RNA.",
+        "Envelope derived from host endoplasmic reticulum.",
+        "Mutations in spike drive variant emergence."
+      ],
+      "stats": { "complexity": 2, "components": 4, "genomeKb": 30 },
+      "components": [
+        { "id": "envelope", "label": "Lipid envelope", "role": "stolen host membrane", "color": "#7dfce0", "size": "~80 nm sphere", "fact": "Detergent-sensitive — soap disrupts it easily." },
+        { "id": "spike", "label": "Spike trimers", "role": "ACE2 binding", "color": "#ff8a4c", "size": "~20 nm tall", "fact": "Each spike is a trimer; mutations here drive variants." },
+        { "id": "membrane-prot", "label": "M + E proteins", "role": "envelope scaffold", "color": "#ffbd4e", "size": "membrane-spanning", "fact": "Most abundant structural protein is M, organising the envelope." },
+        { "id": "rna", "label": "RNA + N protein", "role": "genome + nucleocapsid", "color": "#9a7bff", "size": "~30 kb", "fact": "N protein coats the RNA into a long flexible nucleocapsid." }
+      ],
+      "lifecycle": [
+        { "id": "attachment", "label": "Attachment", "narration": "Spike protein binds ACE2 receptor on the host cell surface.", "durationMin": "seconds" },
+        { "id": "entry", "label": "Entry", "narration": "TMPRSS2 cleaves spike; viral envelope fuses with host membrane and releases RNA.", "durationMin": "minutes" },
+        { "id": "replication", "label": "Replication", "narration": "Host ribosomes translate viral RNA into RdRp + structural proteins; RNA is copied.", "durationMin": "hours" },
+        { "id": "assembly", "label": "Assembly", "narration": "Genome + N protein + M + E proteins assemble at ERGIC; spike is glycosylated.", "durationMin": "hours" },
+        { "id": "release", "label": "Release", "narration": "New virions bud through the host membrane and exit by exocytosis.", "durationMin": "hours" }
+      ],
+      "cad": { "source": "cad_source/virus_sarscov2.py", "outputs": ["STEP", "STL", "GLB"], "prompt": "Stylised SARS-CoV-2: icosphere envelope, 32 spike trimers, helical RNA inside." },
+      "geometry": { "builder": "buildVirus", "params": { "radius": 0.55, "spikeCount": 40, "spikeLength": 0.22, "spikeHeadRadius": 0.07, "rnaLoops": 5 } }
+    },
+    {
+      "id": "bacteriophage",
+      "label": "Bacteriophage T4",
+      "kingdom": "Viruses",
+      "type": "dsdna-bacteriophage",
+      "category": "viruses",
+      "taxonomy": ["Life", "Acellular", "Viruses", "Caudovirales (T4 phage)"],
+      "atlasPosition": [3.4, -0.3, 3.0],
+      "scale": 0.85,
+      "size": "~200 nm long",
+      "accent": "#5ff0c4",
+      "status": "offline",
+      "summary": "Iconic tailed dsDNA virus that lands on bacteria like a lunar lander and injects its DNA.",
+      "funFact": "T4 phage looks more like a 1960s spacecraft than anything else in biology — with a head, neck, contractile sheath, baseplate, and six articulated landing legs.",
+      "facts": [
+        "Genome ~169 kb double-stranded DNA inside the icosahedral head.",
+        "Tail sheath contracts on landing, driving the inner tube into the bacterium.",
+        "Six tail fibers recognise lipopolysaccharide on E. coli outer membrane.",
+        "Each infection cycle releases ~100-200 progeny phages in 25-30 minutes."
+      ],
+      "stats": { "complexity": 4, "components": 7, "genomeKb": 169, "burstSize": 150 },
+      "components": [
+        { "id": "capsid", "label": "Head capsid", "role": "icosahedral DNA shell", "color": "#ff8a4c", "size": "~115 × 86 nm", "fact": "Pressurised with DNA at ~6 MPa — like a bottled spring." },
+        { "id": "collar", "label": "Collar", "role": "head-tail connector", "color": "#ff8a4c", "size": "~10 nm ring", "fact": "Contains the portal protein DNA passes through during packaging." },
+        { "id": "sheath", "label": "Tail sheath", "role": "contractile motor", "color": "#ff8a4c", "size": "~80 nm long", "fact": "Contracts to half its length, generating 50 piconewtons of force." },
+        { "id": "tail", "label": "Tail tube", "role": "DNA injector", "color": "#5ff0c4", "size": "~80 nm long", "fact": "Acts as a syringe needle through the bacterial wall." },
+        { "id": "baseplate", "label": "Base plate", "role": "trigger + anchor", "color": "#ff6ea8", "size": "~50 nm hexagon", "fact": "Senses host cell receptors, triggers tail contraction." },
+        { "id": "fibers", "label": "Tail fibers", "role": "host recognition", "color": "#5ff0c4", "size": "6 × ~145 nm", "fact": "Articulated like spider legs; bind LPS on E. coli surface." },
+        { "id": "dna", "label": "dsDNA genome", "role": "genetic payload", "color": "#9a7bff", "size": "~169 kb", "fact": "Linear genome circularises and integrates after injection." }
+      ],
+      "lifecycle": [
+        { "id": "attachment", "label": "Attachment", "narration": "Tail fibers recognise LPS on the bacterial outer membrane and lock on.", "durationMin": "seconds" },
+        { "id": "injection", "label": "Injection", "narration": "Sheath contracts, driving the tail tube through the wall; DNA is injected.", "durationMin": "seconds" },
+        { "id": "replication", "label": "Replication", "narration": "Phage DNA hijacks bacterial machinery to make new genomes + structural proteins.", "durationMin": "~15 min" },
+        { "id": "assembly", "label": "Assembly", "narration": "Heads, tails, fibers self-assemble in the host cytoplasm; DNA is packaged into heads.", "durationMin": "~10 min" },
+        { "id": "lysis", "label": "Lysis", "narration": "Phage lysozyme bursts the bacterium, releasing ~150 progeny phages.", "durationMin": "seconds" }
+      ],
+      "cad": { "source": "cad_source/bacteriophage.py", "outputs": ["STEP", "GLB"], "prompt": "T4 bacteriophage: icosahedral head, contractile tail sheath, base plate, six articulated tail fibers, internal helical dsDNA." },
+      "geometry": { "builder": "buildBacteriophage", "params": { "headRadius": 0.55, "headHeight": 0.7, "tailLength": 0.85, "tailRadius": 0.085, "fiberCount": 6, "fiberLength": 0.7 } }
+    },
+    {
+      "id": "hiv",
+      "label": "HIV virion",
+      "kingdom": "Viruses",
+      "type": "retrovirus",
+      "category": "viruses",
+      "taxonomy": ["Life", "Acellular", "Viruses", "Retroviridae (HIV)"],
+      "atlasPosition": [-3.0, 0.5, 3.2],
+      "scale": 0.9,
+      "size": "~120 nm",
+      "accent": "#ff5f7a",
+      "status": "offline",
+      "summary": "Retrovirus with conical capsid, two RNA copies, and reverse transcriptase that integrates into host DNA.",
+      "funFact": "HIV's signature cone-shaped capsid is built from ~250 hexamers + 12 pentamers — a beautifully irregular polyhedron.",
+      "facts": [
+        "Carries two copies of single-stranded RNA + reverse transcriptase + integrase.",
+        "Reverse transcriptase converts RNA into dsDNA, which integrates into the host genome.",
+        "Spikes are gp120 (binds CD4 + CCR5/CXCR4) on top of gp41 stalks.",
+        "After integration, the provirus can stay latent for years."
+      ],
+      "stats": { "complexity": 3, "components": 4, "genomeKb": 9.7 },
+      "components": [
+        { "id": "envelope", "label": "Lipid envelope", "role": "stolen host membrane", "color": "#7dfce0", "size": "~120 nm", "fact": "Studded with host MHC and adhesion proteins as well as viral spikes." },
+        { "id": "spike", "label": "gp120 / gp41 spikes", "role": "CD4 + co-receptor binding", "color": "#ff5f7a", "size": "~14 trimers", "fact": "gp120 binds CD4; gp41 mediates membrane fusion." },
+        { "id": "capsid", "label": "Conical capsid (p24)", "role": "protects + organises RNA", "color": "#ffbd4e", "size": "~100 nm cone", "fact": "The cone is mathematically a fullerene with 12 pentamers — 7 at one end, 5 at the other." },
+        { "id": "rna", "label": "ssRNA + RT + integrase", "role": "genome + reverse transcription", "color": "#9a7bff", "size": "~9.7 kb × 2", "fact": "RT makes ≈1 mutation per genome per replication — this is why HIV evolves so fast." }
+      ],
+      "lifecycle": [
+        { "id": "attachment", "label": "Attachment", "narration": "gp120 binds CD4 on T-helper cells, then engages CCR5 or CXCR4 co-receptor.", "durationMin": "seconds" },
+        { "id": "entry", "label": "Fusion + entry", "narration": "gp41 conformational change pulls the viral and host membranes together; capsid enters cytoplasm.", "durationMin": "minutes" },
+        { "id": "reverse-transcription", "label": "Reverse transcription", "narration": "RT converts viral RNA into dsDNA inside the capsid, which transports through the nuclear pore.", "durationMin": "hours" },
+        { "id": "integration", "label": "Integration", "narration": "Integrase inserts dsDNA into the host genome — the cell is now permanently infected.", "durationMin": "hours" },
+        { "id": "budding", "label": "Assembly + budding", "narration": "New virions assemble at the plasma membrane and bud off; protease then matures the conical capsid.", "durationMin": "days" }
+      ],
+      "cad": { "source": "cad_source/hiv.py", "outputs": ["STEP", "GLB"], "prompt": "HIV virion: spherical envelope with gp120/gp41 spike trimers, internal conical capsid, two RNA strands with RT clusters." },
+      "geometry": { "builder": "buildHIV", "params": { "radius": 0.55, "capsidLength": 0.5, "spikeCount": 22 } }
+    },
+    {
+      "id": "influenza",
+      "label": "Influenza A",
+      "kingdom": "Viruses",
+      "type": "orthomyxovirus",
+      "category": "viruses",
+      "taxonomy": ["Life", "Acellular", "Viruses", "Orthomyxoviridae (Influenza)"],
+      "atlasPosition": [3.0, 0.5, -3.4],
+      "scale": 0.85,
+      "size": "~100 nm",
+      "accent": "#ffbd4e",
+      "status": "offline",
+      "summary": "Segmented negative-sense RNA virus with two spike types: HA (hemagglutinin) and NA (neuraminidase).",
+      "funFact": "Influenza's genome is split into 8 separate RNA segments — when two strains co-infect a host they can shuffle segments and create a pandemic strain.",
+      "facts": [
+        "HA binds sialic acid receptors and triggers membrane fusion in endosomes.",
+        "NA cleaves sialic acid so progeny virions can detach from the host.",
+        "Antigenic drift = mutations in HA/NA; antigenic shift = whole-segment reassortment.",
+        "H1N1, H3N2, H5N1 etc. name the HA + NA subtypes."
+      ],
+      "stats": { "complexity": 3, "components": 4, "rnaSegments": 8 },
+      "components": [
+        { "id": "envelope", "label": "Lipid envelope", "role": "host-derived membrane", "color": "#7dfce0", "size": "~100 nm", "fact": "Pleomorphic — spherical and filamentous forms both exist." },
+        { "id": "ha", "label": "Hemagglutinin (HA)", "role": "sialic-acid binding + fusion", "color": "#ff8a4c", "size": "~13 nm tall", "fact": "Outnumbers NA roughly 4:1 on the surface." },
+        { "id": "na", "label": "Neuraminidase (NA)", "role": "sialic-acid cleaver", "color": "#ffbd4e", "size": "~13 nm tall", "fact": "Target of oseltamivir (Tamiflu) and zanamivir." },
+        { "id": "rna", "label": "8 RNA segments + N", "role": "segmented genome", "color": "#9a7bff", "size": "~13.5 kb total", "fact": "Reassortment of these 8 segments drives pandemic emergence." }
+      ],
+      "lifecycle": [
+        { "id": "attachment", "label": "Attachment", "narration": "HA binds sialic acid on respiratory epithelial cells.", "durationMin": "seconds" },
+        { "id": "endocytosis", "label": "Endocytosis", "narration": "Virion is engulfed; low-pH endosome triggers HA conformational change → fusion.", "durationMin": "minutes" },
+        { "id": "replication", "label": "Replication (nucleus)", "narration": "Unusually for an RNA virus, influenza replicates inside the nucleus using viral RdRp.", "durationMin": "hours" },
+        { "id": "assembly", "label": "Assembly", "narration": "All 8 segments + structural proteins traffic to the plasma membrane and pack into new virions.", "durationMin": "hours" },
+        { "id": "release", "label": "Release", "narration": "NA cleaves sialic acid so progeny virions detach and spread.", "durationMin": "hours" }
+      ],
+      "cad": { "source": "cad_source/influenza.py", "outputs": ["STEP", "GLB"], "prompt": "Influenza A virion: spherical envelope with HA trimer clubs and NA tetramer mushrooms; 8 internal RNA segments." },
+      "geometry": { "builder": "buildInfluenza", "params": { "radius": 0.55, "haCount": 28, "naCount": 10 } }
+    },
+    {
+      "id": "adenovirus",
+      "label": "Adenovirus",
+      "kingdom": "Viruses",
+      "type": "adenoviridae",
+      "category": "viruses",
+      "taxonomy": ["Life", "Acellular", "Viruses", "Adenoviridae (Adenovirus)"],
+      "atlasPosition": [-3.0, -0.5, -3.4],
+      "scale": 0.85,
+      "size": "~90 nm",
+      "accent": "#9dcfff",
+      "status": "offline",
+      "summary": "Non-enveloped icosahedral dsDNA virus with characteristic fiber projections at each vertex — used as gene-therapy vector.",
+      "funFact": "Adenoviruses inspired modern gene-therapy and vaccine vectors (e.g. ChAdOx1 in the AstraZeneca COVID-19 vaccine).",
+      "facts": [
+        "Capsid has 252 capsomers: 240 hexons (faces) + 12 pentons (vertices).",
+        "Each penton has one fiber projection that ends in a knob.",
+        "dsDNA genome ~36 kb, no envelope, very stable.",
+        "Causes respiratory, eye, and GI infections; engineered for gene delivery."
+      ],
+      "stats": { "complexity": 3, "components": 3, "genomeKb": 36 },
+      "components": [
+        { "id": "capsid", "label": "Icosahedral capsid", "role": "protein shell", "color": "#9dcfff", "size": "~90 nm", "fact": "Made from hexon (240) + penton (12) proteins." },
+        { "id": "fibers", "label": "Fiber projections", "role": "receptor binding (CAR/CD46)", "color": "#5ff0c4", "size": "~12 × 30 nm", "fact": "Knob at the tip determines tissue tropism." },
+        { "id": "dna", "label": "dsDNA core", "role": "genome", "color": "#9a7bff", "size": "~36 kb", "fact": "Linear, with terminal protein covalently attached to each end." }
+      ],
+      "lifecycle": [
+        { "id": "attachment", "label": "Attachment", "narration": "Fiber knob binds CAR or CD46 on host cells.", "durationMin": "seconds" },
+        { "id": "endocytosis", "label": "Endocytosis", "narration": "Penton base engages integrins; virus is internalised in clathrin-coated vesicles.", "durationMin": "minutes" },
+        { "id": "escape", "label": "Endosomal escape", "narration": "Capsid disassembles in the endosome, viral DNA is delivered to nuclear pore.", "durationMin": "minutes" },
+        { "id": "replication", "label": "Replication", "narration": "Viral DNA polymerase replicates dsDNA inside the nucleus using viral terminal protein primer.", "durationMin": "hours" },
+        { "id": "release", "label": "Release", "narration": "New virions accumulate, eventually lysing the host cell to spread.", "durationMin": "days" }
+      ],
+      "cad": { "source": "cad_source/adenovirus.py", "outputs": ["STEP", "GLB"], "prompt": "Adenovirus: icosahedral capsid with 12 fiber projections (each ending in a knob) at the vertices, internal dsDNA core." },
+      "geometry": { "builder": "buildAdenovirus", "params": { "radius": 0.55, "fiberLength": 0.32 } }
+    },
+    {
+      "id": "erythrocyte",
+      "label": "Red Blood Cell",
+      "kingdom": "Animalia",
+      "type": "erythrocyte",
+      "category": "blood",
+      "taxonomy": ["Life", "Cellular", "Eukarya", "Animalia", "Blood (erythrocyte)"],
+      "atlasPosition": [4.0, 0.6, -1.6],
+      "scale": 0.85,
+      "size": "~7.5 µm diameter, 2 µm thick",
+      "accent": "#ff5f7a",
+      "status": "online",
+      "summary": "Anucleate biconcave-disc cell packed with hemoglobin — the dedicated oxygen courier.",
+      "funFact": "You make about 2 million new red blood cells every second, and each one carries roughly 270 million hemoglobin molecules.",
+      "facts": [
+        "Mature RBCs eject their nucleus during erythropoiesis to maximise hemoglobin space.",
+        "Biconcave disc shape gives high surface area + flexibility to squeeze through capillaries.",
+        "Average lifespan ~120 days before being recycled in the spleen and liver.",
+        "Surface antigens (ABO, Rh) define blood groups for transfusion compatibility."
+      ],
+      "stats": { "complexity": 2, "components": 3, "hbPerCell": 270e6, "lifespanDays": 120 },
+      "components": [
+        { "id": "membrane", "label": "Plasma membrane", "role": "flexible biconcave envelope", "color": "#ff5f7a", "size": "~7.5 µm disc", "fact": "Spectrin cytoskeleton lets the cell deform through 3 µm capillaries." },
+        { "id": "hemoglobin", "label": "Hemoglobin", "role": "O₂ / CO₂ transport", "color": "#ffbd4e", "size": "4 subunits", "fact": "Each Hb tetramer can carry 4 O₂ molecules cooperatively." },
+        { "id": "antigens", "label": "Surface antigens", "role": "blood-group identity", "color": "#ff8a4c", "size": "glycoproteins", "fact": "ABO + Rh are the most clinically important; ~30 systems exist." }
+      ],
+      "cad": { "source": "cad_source/erythrocyte.py", "outputs": ["STEP", "GLB"], "prompt": "Biconcave disc red blood cell with central depression on both sides, surface antigen pattern, internal hemoglobin grain." },
+      "geometry": { "builder": "buildErythrocyte", "params": { "radius": 1.0, "thickness": 0.32, "indent": 0.5 } }
+    },
+    {
+      "id": "mitochondrion",
+      "label": "Mitochondrion",
+      "kingdom": "Organelle",
+      "type": "organelle-endosymbiont",
+      "category": "organelle",
+      "taxonomy": ["Life", "Subcellular", "Organelles"],
+      "atlasPosition": [-2.1, 0.0, 3.6],
+      "scale": 0.85,
+      "size": "0.5-3 µm",
+      "accent": "#ffbd4e",
+      "status": "online",
+      "summary": "ATP powerhouse with cristae-folded inner membrane, matrix, and its own circular DNA.",
+      "funFact": "Mitochondria are the descendants of free-living α-proteobacteria absorbed ~1.5 billion years ago.",
+      "facts": [
+        "Cristae enlarge the inner membrane surface area by ~5x.",
+        "ATP synthase sits on the cristae membrane.",
+        "Mitochondrial DNA inherits maternally.",
+        "Endosymbiotic origin from ancient α-proteobacteria."
+      ],
+      "stats": { "complexity": 4, "components": 5, "atpPerSec": 1.5e6 },
+      "components": [
+        { "id": "outer", "label": "Outer membrane", "role": "smooth envelope", "color": "#7dfce0", "size": "ellipsoid 1×3 µm", "fact": "Permeable to small molecules via porins." },
+        { "id": "inner", "label": "Inner membrane", "role": "hosts ETC + ATP synthase", "color": "#ffbd4e", "size": "highly folded", "fact": "Has 5x the surface area of the outer membrane." },
+        { "id": "cristae", "label": "Cristae", "role": "folded surface area", "color": "#ff8a4c", "size": "lamellar folds", "fact": "ATP synthase rotates here at ~6,000 RPM." },
+        { "id": "matrix", "label": "Matrix", "role": "Krebs cycle enzymes", "color": "#ffe2b0", "size": "soluble interior", "fact": "Contains mitochondrial ribosomes, mtDNA, and the citric acid cycle." },
+        { "id": "mtdna", "label": "mtDNA", "role": "circular genome", "color": "#9a7bff", "size": "16 kb", "fact": "Encodes 13 proteins, 22 tRNAs, 2 rRNAs — the rest is imported." }
+      ],
+      "cad": { "source": "cad_source/mitochondrion.py", "outputs": ["STEP", "STL", "GLB"], "prompt": "Stylised mitochondrion: ellipsoid outer + inner membrane, cristae folds, mtDNA loop." },
+      "geometry": { "builder": "buildMitochondrion", "params": { "length": 1.5, "radius": 0.55, "cristaeCount": 7, "cristaeDepth": 0.38, "mtdnaLoops": 2 } }
+    },
+    {
+      "id": "ribosome",
+      "label": "Ribosome",
+      "kingdom": "Organelle",
+      "type": "ribonucleoprotein",
+      "category": "organelle",
+      "taxonomy": ["Life", "Subcellular", "Organelles"],
+      "atlasPosition": [0.0, 1.95, 0.0],
+      "scale": 0.8,
+      "size": "20-30 nm",
+      "accent": "#d7fff6",
+      "status": "online",
+      "summary": "Ribonucleoprotein machine with large (60S) and small (40S) subunits translating mRNA.",
+      "funFact": "Ribosomes are the slowest known molecular machines that nonetheless out-produce nearly every other complex by mass.",
+      "facts": [
+        "Peptidyl transferase activity lives in the rRNA, making it a ribozyme.",
+        "Eukaryotic 80S = 60S + 40S; prokaryotic 70S = 50S + 30S.",
+        "Bound to ER forms rough ER.",
+        "Polysomes = multiple ribosomes on one mRNA."
+      ],
+      "stats": { "complexity": 2, "components": 3, "aminoAcidsPerSec": 20 },
+      "components": [
+        { "id": "large", "label": "Large subunit (60S)", "role": "peptidyl transferase", "color": "#d7fff6", "size": "~25 nm", "fact": "Catalyses peptide bond formation via rRNA, not protein." },
+        { "id": "small", "label": "Small subunit (40S)", "role": "mRNA decoding", "color": "#9dcfff", "size": "~20 nm", "fact": "Reads mRNA codons and selects the matching tRNA." },
+        { "id": "mrna", "label": "mRNA thread", "role": "template", "color": "#ff9f7b", "size": "thin strand", "fact": "Multiple ribosomes can translate one mRNA at once (polysome)." }
+      ],
+      "cad": { "source": "cad_source/ribosome.py", "outputs": ["STEP", "GLB"], "prompt": "Stylised ribosome: large lumpy subunit, small subunit cap, mRNA tube through cleft." },
+      "geometry": { "builder": "buildRibosome", "params": { "largeRadius": 0.36, "smallRadius": 0.24, "craterCount": 14, "mrnaLength": 1.2 } }
+    }
+  ],
+  "links": [
+    ["animal-cell", "mitochondrion", "hosts inside"],
+    ["animal-cell", "ribosome", "hosts inside"],
+    ["plant-cell", "mitochondrion", "hosts inside"],
+    ["ecoli", "ribosome", "70S inside"],
+    ["tcell", "virus", "antigen recognition"],
+    ["animal-cell", "virus", "infection target"],
+    ["neuron", "animal-cell", "specialised type"],
+    ["epithelial", "animal-cell", "specialised type"],
+    ["muscle", "animal-cell", "specialised type"],
+    ["stem", "animal-cell", "differentiation source"]
+  ],
+  "cadPipeline": {
+    "purpose": "Convert each cell/organelle into parametric CAD via build123d (text-to-cad harness). Browser uses procedural Three.js geometry; build123d Python source is stored alongside for STEP/GLB regeneration when user installs build123d.",
+    "recommendedTools": [
+      "text-to-cad skill pack (build123d + OCP) for STEP/STL/GLB export",
+      "Run: python3.11 -m skills.cad.scripts.step cad_source/<cell>.py (when installed)"
+    ],
+    "defaultOutputs": ["STEP", "GLB"],
+    "rules": [
+      "Keep dimensions in millimeters (educational scale).",
+      "Each cell script defines a gen_step() returning build123d compound for named parts.",
+      "Browser never loads external GLB; geometry builder in assets/bio/geometry.js is the single runtime source."
+    ]
+  }
+}

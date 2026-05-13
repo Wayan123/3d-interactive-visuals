@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <title>Cell Architecture Studio — Local 3D Biology Explorer</title>
+  <meta name="description" content="Local 3D explorer for bacteria, eukaryotic cells, organelles, and viruses. Procedural Three.js rendering with electron-microscope, microscope, standalone, and compare views." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230f0f0f' stroke='%2300d4aa' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='10' fill='none' stroke='%2300d4aa' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%2300d4aa'/%3E%3Cline x1='32' y1='4' x2='32' y2='14' stroke='%2300d4aa' stroke-width='2'/%3E%3Cline x1='32' y1='50' x2='32' y2='60' stroke='%2300d4aa' stroke-width='2'/%3E%3Cline x1='4' y1='32' x2='14' y2='32' stroke='%2300d4aa' stroke-width='2'/%3E%3Cline x1='50' y1='32' x2='60' y2='32' stroke='%2300d4aa' stroke-width='2'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="22" height="22">
+          <circle cx="16" cy="16" r="13" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+          <circle cx="16" cy="16" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+          <circle cx="16" cy="16" r="1.4" fill="#00d4aa"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <strong data-i18n="brand.title">Cell Architecture Studio</strong>
+        <small data-i18n="brand.subtitle">Local 3D Biology Explorer</small>
+      </div>
+    </div>
+    <nav class="topbar-tabs" aria-label="Top navigation">
+      <button class="topbar-tab" data-top-tab="gallery" data-i18n="topbar.tab.gallery">Gallery</button>
+      <button class="topbar-tab" data-top-tab="library" data-i18n="topbar.tab.library">Library</button>
+      <button class="topbar-tab" data-top-tab="recents" data-i18n="topbar.tab.recents">Recents</button>
+      <button class="topbar-tab" data-top-tab="manual" data-i18n="topbar.tab.manual">Manual</button>
+      <button class="topbar-tab" data-top-tab="settings" data-i18n="topbar.tab.settings">Settings</button>
+    </nav>
+    <div class="topbar-actions">
+      <span id="apiBadge" class="api-badge" data-state="static">STATIC</span>
+      <button class="topbar-search" type="button" aria-label="Search">
+        <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="11" y1="11" x2="14" y2="14" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span data-i18n="topbar.search">Search cells…</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button class="topbar-avatar" type="button" aria-label="Account">W</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <p class="eyebrow" data-i18n="sidebar.eyebrow">Cell library</p>
+        <button id="newProjectBtn" class="new-project" type="button">
+          <span>+</span> <span data-i18n="sidebar.newProject">New project</span>
+        </button>
+      </div>
+      <nav id="cellList" class="cell-list" aria-label="Cells"></nav>
+      <div class="sidebar-foot">
+        <div class="system-pill" title="Local system metrics">
+          <span class="pill-dot" id="systemDot"></span>
+          <strong id="systemSummary">--</strong>
+        </div>
+      </div>
+    </aside>
+
+    <section class="stage">
+      <div class="stage-head">
+        <div>
+          <p class="eyebrow" id="cellKingdom">--</p>
+          <h2 id="selectedTitle">--</h2>
+          <p id="selectedRole" class="muted">--</p>
+        </div>
+        <div class="stage-meta">
+          <span class="stage-meta-pill" id="selectedSize">--</span>
+          <span class="stage-meta-pill mode-pill" id="modePill">Standalone</span>
+        </div>
+      </div>
+
+      <div class="viewport-wrap" id="viewportWrap">
+        <canvas id="fleetCanvas" aria-label="3D cell view"></canvas>
+        <div id="fallbackMap" class="fallback-map" hidden></div>
+
+        <div class="hud top-left">
+          <span>Render mesh</span>
+          <strong id="meshStatus" data-kind="ok">initializing</strong>
+        </div>
+        <div class="axis-gizmo" id="axisGizmo" aria-hidden="true">
+          <canvas id="axisCanvas" width="92" height="92"></canvas>
+        </div>
+
+        <div id="readOverlay" class="read-overlay" hidden></div>
+
+        <div class="viewport-controls">
+          <button id="rotateBtn" class="vc is-active" type="button" title="Auto-rotate">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 10a7 7 0 0 1 12-4.95"/><path d="M17 10a7 7 0 0 1-12 4.95"/><path d="M15 2v4h-4"/><path d="M5 18v-4h4"/></svg>
+            <span data-i18n="controls.rotate">Rotate</span>
+          </button>
+          <button id="isolateBtn" class="vc" type="button" title="Isolate selected organelle">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="6"/><circle cx="10" cy="10" r="2.2" fill="currentColor"/></svg>
+            <span data-i18n="controls.isolate">Isolate</span>
+          </button>
+          <button id="hideOthersBtn" class="vc" type="button" title="Hide other cells">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 10C4 5 7 3 10 3s6 2 8 7c-2 5-5 7-8 7s-6-2-8-7Z"/><circle cx="10" cy="10" r="2.5"/><line x1="3" y1="3" x2="17" y2="17"/></svg>
+            <span data-i18n="controls.hideOthers">Hide others</span>
+          </button>
+          <button id="sectionBtn" class="vc" type="button" title="Cross-section">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><line x1="3" y1="10" x2="17" y2="10"/></svg>
+            <span data-i18n="controls.section">Section</span>
+          </button>
+          <button id="readViewBtn" class="vc" type="button" title="Annotated read view">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 4h7l4 3v9H3z"/><path d="M14 7v9"/><path d="M6 9h5"/><path d="M6 12h5"/></svg>
+            <span data-i18n="controls.readView">Read View</span>
+          </button>
+          <button id="screenshotBtn" class="vc" type="button" title="Capture viewport">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 6V4h10v2"/><rect x="2" y="6" width="16" height="11" rx="2"/><circle cx="10" cy="11" r="3"/></svg>
+            <span data-i18n="controls.screenshot">Screenshot</span>
+          </button>
+          <button id="exportBtn" class="vc" type="button" title="Export JSON or 3D">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 3v10"/><path d="M6 9l4 4 4-4"/><path d="M3 16h14"/></svg>
+            <span data-i18n="controls.export">3D Export</span>
+          </button>
+        </div>
+
+        <div id="sectionPanel" class="section-panel" hidden>
+          <span class="section-title-mini" data-i18n="controls.crossSection">Cross-section</span>
+          <div class="section-axes">
+            <button class="section-axis is-active" data-axis="y">Y</button>
+            <button class="section-axis" data-axis="x">X</button>
+            <button class="section-axis" data-axis="z">Z</button>
+          </div>
+          <input id="sectionRange" type="range" min="0" max="100" value="100" />
+          <span class="section-value" id="sectionValue">100%</span>
+        </div>
+
+        <div id="processOverlay" class="process-overlay" hidden>
+          <div class="process-stage-info">
+            <span class="process-stage-counter">Stage <strong id="processStageNum">1</strong>/<span id="processStageTotal">5</span></span>
+            <strong class="process-stage-label" id="processStageLabel">Attachment</strong>
+            <p class="process-stage-narration" id="processStageNarration">--</p>
+            <span class="process-stage-duration" id="processStageDuration">--</span>
+          </div>
+          <div class="process-timeline">
+            <button class="process-step" id="processPlayBtn" type="button" title="Play / pause">
+              <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor"><polygon points="3,2 10,6 3,10"/></svg>
+            </button>
+            <div class="process-dots" id="processDots"></div>
+            <button class="process-step" id="processNextBtn" type="button" title="Next stage">›</button>
+          </div>
+        </div>
+
+        <div id="hoverTooltip" class="hover-tooltip" hidden></div>
+      </div>
+
+      <div class="view-strip">
+        <p class="strip-label" data-i18n="viewModes.label">View modes</p>
+        <div class="view-strip-grid">
+          <button class="view-tile is-active" data-mode="standalone" type="button">
+            <span class="view-tile-thumb" data-thumb="standalone"></span>
+            <strong data-i18n="viewModes.standalone">Standalone</strong>
+            <small data-i18n="viewModes.standalone.sub">Single cell stage</small>
+          </button>
+          <button class="view-tile" data-mode="microscope" type="button">
+            <span class="view-tile-thumb" data-thumb="microscope"></span>
+            <strong data-i18n="viewModes.microscope">Microscope</strong>
+            <small data-i18n="viewModes.microscope.sub">Vignette + scanlines</small>
+          </button>
+          <button class="view-tile" data-mode="electron" type="button">
+            <span class="view-tile-thumb" data-thumb="electron"></span>
+            <strong data-i18n="viewModes.electron">Electron Microscope</strong>
+            <small data-i18n="viewModes.electron.sub">Greyscale + edges</small>
+          </button>
+          <button class="view-tile" data-mode="process" type="button">
+            <span class="view-tile-thumb" data-thumb="process"></span>
+            <strong data-i18n="viewModes.process">Process</strong>
+            <small data-i18n="viewModes.process.sub">Virus replication timeline</small>
+          </button>
+          <button class="view-tile" data-mode="atlas" type="button">
+            <span class="view-tile-thumb" data-thumb="atlas"></span>
+            <strong data-i18n="viewModes.atlas">Atlas</strong>
+            <small data-i18n="viewModes.atlas.sub">All cells together</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="compare-row">
+        <p class="strip-label" data-i18n="compare.label">Compare cells</p>
+        <div class="compare-grid">
+          <button class="compare-card" id="compareLeft" type="button">
+            <span class="compare-thumb" data-cell-thumb></span>
+            <strong data-i18n="compare.left">Left cell</strong>
+          </button>
+          <span class="compare-vs">VS</span>
+          <button class="compare-card" id="compareRight" type="button">
+            <span class="compare-thumb" data-cell-thumb></span>
+            <strong data-i18n="compare.right">Right cell</strong>
+          </button>
+          <button class="compare-action" id="compareToggle" type="button" data-i18n="compare.action">
+            Open compare
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="detail-panel">
+      <div class="panel-section organelle-section">
+        <div class="section-title">
+          <span data-i18n="detail.organelleDetails">Organelle details</span>
+          <button id="resetFocusBtn" class="mini-action" type="button" data-i18n="controls.allVisible">All visible</button>
+        </div>
+        <div class="organelle-card" id="organelleCard">
+          <header>
+            <span class="organelle-dot" id="organelleDot"></span>
+            <div>
+              <strong id="organelleName">--</strong>
+              <small id="organelleRole">--</small>
+            </div>
+          </header>
+          <dl class="organelle-meta">
+            <div><dt data-i18n="detail.size">Size</dt><dd id="organelleSize">--</dd></div>
+            <div><dt data-i18n="detail.visible">Visible</dt><dd>
+              <label class="switch">
+                <input id="orgVisibleToggle" type="checkbox" checked />
+                <span class="switch-knob"></span>
+              </label>
+            </dd></div>
+            <div><dt data-i18n="detail.label">Label</dt><dd>
+              <label class="switch">
+                <input id="orgLabelToggle" type="checkbox" />
+                <span class="switch-knob"></span>
+              </label>
+            </dd></div>
+          </dl>
+          <p class="organelle-fact" id="organelleFact">Select an organelle.</p>
+        </div>
+        <div id="componentList" class="component-chips"></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title" data-i18n="detail.whereItOccurs">Where it occurs</div>
+        <div id="taxonomyTree" class="taxonomy-tree"></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title" data-i18n="detail.keyFacts">Key facts</div>
+        <ul id="factsList" class="facts-list"></ul>
+      </div>
+
+      <div class="panel-section stats-section">
+        <div class="section-title" data-i18n="detail.stats">Stats</div>
+        <div id="statsGrid" class="metrics-grid"></div>
+      </div>
+
+      <div class="panel-section service-block">
+        <div class="section-title">
+          <span data-i18n="detail.localServices">Local services</span>
+          <span class="last-refresh"><span data-i18n="detail.lastRefresh">Last</span> <span id="lastRefresh">--</span></span>
+        </div>
+        <div class="system-metrics">
+          <div><span>CPU</span><strong id="systemCpu">--%</strong></div>
+          <div><span>RAM</span><strong id="systemMem">--%</strong></div>
+          <div><span>Disk</span><strong id="systemDisk">--%</strong></div>
+        </div>
+        <ul id="serviceList" class="service-list"></ul>
+      </div>
+
+      <div class="panel-section cad-section">
+        <div class="section-title" data-i18n="detail.cadBridge">Text-to-CAD bridge</div>
+        <p class="muted" id="cadHelp">Source build123d ada di <code id="cadSource">cad_source/...</code>. Browser tidak butuh build123d untuk render.</p>
+        <div class="cad-source-row">
+          <button id="copyCadSource" class="mini-action" type="button" data-i18n="detail.copyPath">Copy path</button>
+          <button id="copyCadPrompt" class="mini-action" type="button" data-i18n="detail.copyPrompt">Copy prompt</button>
+        </div>
+        <pre id="cadPrompt" class="cad-prompt"></pre>
+      </div>
+    </aside>
+  </main>
+
+  <div id="exportSheet" class="export-sheet" hidden>
+    <div class="export-card">
+      <h3 data-i18n="export.title">3D Export</h3>
+      <p class="muted" id="exportSubtitle">Pilih format export untuk <strong id="exportCellLabel">--</strong>.</p>
+      <div class="export-options">
+        <button class="export-option" data-export="json">
+          <strong data-i18n="export.json">Atlas JSON</strong>
+          <span data-i18n="export.json.sub">Full atlas with every cell + organelle</span>
+        </button>
+        <button class="export-option" data-export="cell-json">
+          <strong data-i18n="export.cellJson">Cell JSON</strong>
+          <span data-i18n="export.cellJson.sub">Just this cell + organelle metadata</span>
+        </button>
+        <button class="export-option" data-export="glb">
+          <strong data-i18n="export.glb">GLB (procedural)</strong>
+          <span data-i18n="export.glb.sub">Three.js scene serialised via GLTFExporter</span>
+        </button>
+        <button class="export-option" data-export="step-instructions">
+          <strong data-i18n="export.step">STEP via build123d</strong>
+          <span data-i18n="export.step.sub">Copy-paste python instructions for cad_source/*.py</span>
+        </button>
+      </div>
+      <button class="export-close" id="exportClose" type="button" data-i18n="panel.close">Close</button>
+    </div>
+  </div>
+
+  <!-- Top-tab panels: Gallery / Library / Recents / Settings -->
+  <div id="galleryPanel" class="tab-panel" hidden>
+    <div class="tab-panel-card">
+      <div class="tab-panel-head">
+        <div>
+          <h2 data-i18n="panel.gallery.title">Gallery</h2>
+          <p id="galleryPanelSubtitle">--</p>
+        </div>
+        <button class="tab-panel-close" data-close-panel data-i18n="panel.close">Close</button>
+      </div>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </div>
+  </div>
+
+  <div id="libraryPanel" class="tab-panel" hidden>
+    <div class="tab-panel-card">
+      <div class="tab-panel-head">
+        <div>
+          <h2 data-i18n="panel.library.title">Library</h2>
+          <p data-i18n="panel.library.subtitle">Browse by category, search by name or property.</p>
+        </div>
+        <button class="tab-panel-close" data-close-panel data-i18n="panel.close">Close</button>
+      </div>
+      <div class="library-search">
+        <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="11" y1="11" x2="14" y2="14" stroke="currentColor" stroke-width="1.5"/></svg>
+        <input id="librarySearchInput" type="text" data-i18n-attr="placeholder:panel.library.searchPlaceholder" placeholder="Search by label, kingdom, or component..." />
+      </div>
+      <div id="libraryCategories" class="library-categories"></div>
+    </div>
+  </div>
+
+  <div id="recentsPanel" class="tab-panel" hidden>
+    <div class="tab-panel-card">
+      <div class="tab-panel-head">
+        <div>
+          <h2 data-i18n="panel.recents.title">Recents</h2>
+          <p data-i18n="panel.recents.subtitle">Your recently viewed specimens.</p>
+        </div>
+        <button class="tab-panel-close" data-close-panel data-i18n="panel.close">Close</button>
+      </div>
+      <div id="recentsList" class="recents-list"></div>
+      <button id="recentsClearBtn" class="recents-clear" type="button" data-i18n="panel.recents.clear">Clear history</button>
+    </div>
+  </div>
+
+  <div id="manualPanel" class="tab-panel" hidden>
+    <div class="tab-panel-card manual-card">
+      <div class="tab-panel-head">
+        <div>
+          <h2 data-i18n="panel.manual.title">User Manual</h2>
+          <p data-i18n="panel.manual.subtitle">Everything you need to explore the 16 specimens.</p>
+        </div>
+        <button class="tab-panel-close" data-close-panel data-i18n="panel.close">Close</button>
+      </div>
+      <div class="manual-layout">
+        <nav id="manualToc" class="manual-toc" aria-label="Manual sections"></nav>
+        <article id="manualContent" class="manual-content"></article>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsPanel" class="tab-panel" hidden>
+    <div class="tab-panel-card">
+      <div class="tab-panel-head">
+        <div>
+          <h2 data-i18n="panel.settings.title">Settings</h2>
+          <p data-i18n="panel.settings.subtitle">Preferences are saved to your browser only.</p>
+        </div>
+        <button class="tab-panel-close" data-close-panel data-i18n="panel.close">Close</button>
+      </div>
+      <div class="settings-form">
+        <div class="settings-row">
+          <div class="label-block">
+            <strong data-i18n="panel.settings.theme">Theme</strong>
+            <small></small>
+          </div>
+          <div class="segmented" id="themeSelect">
+            <button data-theme="dark" data-i18n="panel.settings.theme.dark">Dark</button>
+            <button data-theme="light" data-i18n="panel.settings.theme.light">Light</button>
+            <button data-theme="system" data-i18n="panel.settings.theme.system">System</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="label-block">
+            <strong data-i18n="panel.settings.language">Language</strong>
+            <small></small>
+          </div>
+          <div class="segmented" id="langSelect">
+            <button data-lang="en" data-i18n="panel.settings.language.en">English</button>
+            <button data-lang="id" data-i18n="panel.settings.language.id">Indonesian</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="label-block">
+            <strong data-i18n="panel.settings.processAutoplay">Process auto-play</strong>
+            <small data-i18n="panel.settings.processAutoplay.help">Auto-advance virus lifecycle stages every 4 seconds.</small>
+          </div>
+          <label class="toggle-switch">
+            <input id="processAutoplayToggle" type="checkbox" checked />
+            <span class="knob"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <div class="label-block">
+            <strong data-i18n="panel.settings.bloom">Post-FX bloom</strong>
+            <small data-i18n="panel.settings.bloom.help">Subtle glow on emissive surfaces. Disable for lower-end GPUs.</small>
+          </div>
+          <label class="toggle-switch">
+            <input id="bloomToggle" type="checkbox" checked />
+            <span class="knob"></span>
+          </label>
+        </div>
+        <button id="settingsResetBtn" class="settings-reset" type="button" data-i18n="panel.settings.reset">Reset to defaults</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>
