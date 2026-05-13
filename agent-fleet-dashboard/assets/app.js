@@ -1273,6 +1273,10 @@ async function main() {
     const panelParam = params.get("panel");
     if (panelParam && ["gallery", "library", "recents", "manual", "settings"].includes(panelParam)) {
       // Wait a tick so thumbnails can start rendering then open panel
+      const wantSection = params.get("manualSection");
+      if (panelParam === "manual" && wantSection) {
+        state._manualSectionId = wantSection;
+      }
       setTimeout(() => openPanel(panelParam), 200);
     }
   } catch (error) {

@@ -1,15 +1,38 @@
-// Cell Architecture Studio — user manual content.
-// Bilingual (English + Indonesian). Each language has an ordered list of
-// sections; each section has an id, title, and HTML body. The panel renders
+// Cell Architecture Studio — user manual content with rich illustrations.
+// Bilingual (English + Indonesian). Each section has HTML body that mixes
+// prose, code samples, definition lists, and embedded <figure> blocks
+// pointing to screenshots in docs/screenshots/. The Manual panel renders
 // the ToC on the left and the active section on the right.
 
-export const MANUAL = {
-  en: [
+const SHOT = "docs/screenshots";
+
+function fig(src, captionEn, captionId, lang) {
+  const caption = lang === "id" ? captionId : captionEn;
+  return `<figure class="manual-figure">
+    <img src="${SHOT}/${src}" alt="${caption.replace(/"/g, "&quot;")}" loading="lazy" />
+    <figcaption>${caption}</figcaption>
+  </figure>`;
+}
+
+function figRow(items, lang) {
+  // items: [{ src, en, id }, ...]
+  return `<div class="manual-figure-grid manual-figure-grid-${items.length}">
+    ${items.map((it) => `
+      <figure>
+        <img src="${SHOT}/${it.src}" alt="${(lang === "id" ? it.id : it.en).replace(/"/g, "&quot;")}" loading="lazy" />
+        <figcaption>${lang === "id" ? it.id : it.en}</figcaption>
+      </figure>`).join("")}
+  </div>`;
+}
+
+function manualEn() {
+  return [
     {
       id: "getting-started",
       title: "Getting Started",
       body: `
-        <p>Cell Architecture Studio is a local 3D explorer for <strong>16 biological specimens</strong>: tissue cells, bacteria, viruses, blood cells, and standalone organelles. Everything is rendered procedurally in your browser — no external models, no cloud.</p>
+        <p>Cell Architecture Studio is a local 3D explorer for <strong>26 biological specimens</strong>: tissue cells, immune cells, blood cells, reproductive cells, bacteria, fungi, protists, viruses, and standalone organelles. Everything is rendered procedurally in your browser — no external models, no cloud.</p>
+        ${fig("01-landing.png", "Landing view: Plant Cell selected, sidebar grouped by category, axis gizmo top-right, viewport controls along the bottom.", "", "en")}
         <h3>Open the app</h3>
         <ol>
           <li>Make sure the local server is running (<code>./run.sh</code> or via tmux).</li>
@@ -27,10 +50,12 @@ export const MANUAL = {
       id: "interface-tour",
       title: "Interface Tour",
       body: `
+        <p>The studio uses a three-column layout with a top bar and bottom view-strip.</p>
+        ${fig("01-landing.png", "Top bar (5 tabs + LIVE badge), left sidebar (cell library), centre viewport (3D), right detail panel.", "", "en")}
         <h3>Top bar</h3>
         <p>Five tabs — <strong>Gallery</strong>, <strong>Library</strong>, <strong>Recents</strong>, <strong>Manual</strong>, <strong>Settings</strong> — plus a live/static API badge, search, and avatar.</p>
         <h3>Left sidebar</h3>
-        <p>Scrollable cell library grouped into 6 categories: <em>Tissue cells</em>, <em>Specialised</em>, <em>Blood cells</em>, <em>Bacteria</em>, <em>Viruses</em>, <em>Standalone organelles</em>. Each item shows a live 3D thumbnail.</p>
+        <p>Scrollable cell library grouped into 9 categories: <em>Tissue cells</em>, <em>Immune cells</em>, <em>Blood cells</em>, <em>Reproductive cells</em>, <em>Bacteria</em>, <em>Fungi</em>, <em>Protists</em>, <em>Viruses</em>, <em>Standalone organelles</em>. Each item shows a live 3D thumbnail.</p>
         <h3>Main viewport</h3>
         <p>Procedural 3D render of the selected specimen. <strong>Drag</strong> to rotate, <strong>scroll</strong> to zoom, <strong>right-drag</strong> to pan. The top-right XYZ gizmo shows current orientation.</p>
         <h3>Right panel</h3>
@@ -41,6 +66,13 @@ export const MANUAL = {
       title: "View Modes",
       body: `
         <p>Below the viewport there are 5 view-mode tiles. Click to switch.</p>
+        ${figRow([
+          { src: "04-animal-cell.png", en: "Standalone — single cell with soft glow.", id: "" },
+          { src: "manual-fig-microscope.png", en: "Microscope — vignette + scanlines.", id: "" },
+          { src: "10-electron-microscope.png", en: "Electron Microscope — monochrome SEM.", id: "" },
+          { src: "08-process-mode.png", en: "Process — virus replication timeline.", id: "" },
+          { src: "02-atlas.png", en: "Atlas — all 26 specimens together.", id: "" },
+        ], "en")}
         <dl>
           <dt>Standalone</dt>
           <dd>Default. One cell at the centre of the stage with soft glow.</dd>
@@ -49,9 +81,9 @@ export const MANUAL = {
           <dt>Electron Microscope</dt>
           <dd>True monochrome SEM/TEM render — material override + flat shading, bloom off.</dd>
           <dt>Process</dt>
-          <dd>Virus lifecycle timeline (only for the 5 viruses). Auto-plays 5 stages with per-stage narration.</dd>
+          <dd>Virus lifecycle timeline (only for the 6 viruses). Auto-plays 5 stages with per-stage narration.</dd>
           <dt>Atlas</dt>
-          <dd>All 16 specimens orbit on a shared ring with link lines.</dd>
+          <dd>All 26 specimens orbit on a shared ring with link lines.</dd>
         </dl>
         <p>Tip: <code>?mode=electron</code> deep-link opens directly in that mode.</p>`,
     },
@@ -59,7 +91,8 @@ export const MANUAL = {
       id: "controls",
       title: "Viewport Controls",
       body: `
-        <p>The floating control pill at the bottom of the viewport contains 7 tools:</p>
+        <p>The floating control pill at the bottom of the viewport contains 7 tools.</p>
+        ${fig("06-cross-section.png", "Bottom: control pill with 7 tools. Above the pill: the cross-section panel for XYZ slicing. Top-right: axis gizmo.", "", "en")}
         <dl>
           <dt>Rotate</dt>
           <dd>Toggle auto-rotate (slow continuous spin).</dd>
@@ -81,8 +114,18 @@ export const MANUAL = {
       id: "top-panels",
       title: "Top-bar Panels",
       body: `
+        <p>Each top-bar tab opens a full-screen overlay panel. Click the active tab again or press <kbd>Esc</kbd> to close.</p>
+        ${figRow([
+          { src: "03-gallery.png", en: "Gallery — all 26 specimens as cards.", id: "" },
+          { src: "manual-fig-library.png", en: "Library — categorised list with search.", id: "" },
+          { src: "manual-fig-recents.png", en: "Recents — last 12 viewed specimens.", id: "" },
+        ], "en")}
+        ${figRow([
+          { src: "13-manual-english.png", en: "Manual — this panel (11 sections).", id: "" },
+          { src: "15-settings-panel.png", en: "Settings — theme, language, autoplay.", id: "" },
+        ], "en")}
         <h3>Gallery</h3>
-        <p>Grid view of all 16 specimens with rendered thumbnails + category badges. Click any card to open that cell.</p>
+        <p>Grid view of all 26 specimens with rendered thumbnails + category badges. Click any card to open that cell.</p>
         <h3>Library</h3>
         <p>Categorised list with a live search box. Search matches label, kingdom, summary, and organelle names.</p>
         <h3>Recents</h3>
@@ -90,14 +133,17 @@ export const MANUAL = {
         <h3>Manual</h3>
         <p>This panel.</p>
         <h3>Settings</h3>
-        <p>Theme selector (Dark / Light / System), Language (English / Indonesian), Process auto-play toggle, Post-FX bloom toggle, Reset to defaults.</p>
-        <p>Press <kbd>Esc</kbd> to close any open panel.</p>`,
+        <p>Theme selector (Dark / Light / System), Language (English / Indonesian), Process auto-play toggle, Post-FX bloom toggle, Reset to defaults.</p>`,
     },
     {
       id: "virus-lifecycle",
       title: "Virus Lifecycle (Process mode)",
       body: `
-        <p>Each of the 5 viruses has a 5-stage lifecycle. Switch to <strong>Process</strong> mode to play through it.</p>
+        <p>Each of the 6 viruses has a 5-stage lifecycle. Switch to <strong>Process</strong> mode to play through it.</p>
+        ${figRow([
+          { src: "08-process-mode.png", en: "SARS-CoV-2 in Process mode (Replication stage).", id: "" },
+          { src: "09-phage-process.png", en: "Bacteriophage T4 injecting DNA into a host membrane.", id: "" },
+        ], "en")}
         <dl>
           <dt>Stage 1 — Attachment</dt>
           <dd>Virus binds host-cell receptors (ACE2, CD4, CAR, sialic acid, LPS…).</dd>
@@ -116,7 +162,11 @@ export const MANUAL = {
       id: "cross-section",
       title: "Cross-Section",
       body: `
-        <p>Click <strong>Section</strong> in the viewport control pill. A panel appears with:</p>
+        <p>Click <strong>Section</strong> in the viewport control pill to slice the cell open.</p>
+        ${figRow([
+          { src: "04-animal-cell.png", en: "Animal Cell — full membrane, organelles partially obscured.", id: "" },
+          { src: "06-cross-section.png", en: "Same cell sliced at Y 60% — nucleus + mitochondria + Golgi exposed.", id: "" },
+        ], "en")}
         <ul>
           <li><strong>Axis picker</strong>: Y (horizontal slice), X (side), Z (front).</li>
           <li><strong>Slider</strong>: 100% = no cut, 0% = full cut from the positive side.</li>
@@ -137,33 +187,36 @@ export const MANUAL = {
 &theme=dark|light|system
 &lang=en|id
 &panel=gallery|library|recents|manual|settings</code></pre>
-        <p>Examples:</p>
+        ${figRow([
+          { src: "09-phage-process.png", en: "?cell=bacteriophage&mode=process — T4 phage lifecycle", id: "" },
+          { src: "12-light-theme-indonesian.png", en: "?theme=light&lang=id — light theme + Bahasa Indonesia", id: "" },
+        ], "en")}
+        <p>More examples:</p>
         <ul>
-          <li><code>?cell=bacteriophage&amp;mode=process</code> — play T4 phage lifecycle</li>
           <li><code>?cell=hiv&amp;mode=standalone&amp;section=y:50</code> — sliced HIV virion</li>
-          <li><code>?theme=light&amp;lang=id</code> — light theme + Indonesian</li>
+          <li><code>?cell=animal-cell&amp;read=1</code> — read view with annotated organelles</li>
           <li><code>?panel=gallery</code> — open Gallery directly</li>
+          <li><code>?panel=manual&amp;lang=id</code> — open this manual in Indonesian</li>
         </ul>`,
     },
     {
       id: "keyboard-shortcuts",
       title: "Keyboard Shortcuts",
       body: `
-        <dl>
-          <dt><kbd>Esc</kbd></dt>
-          <dd>Close any active top-bar panel (Gallery / Library / Recents / Manual / Settings / Export sheet).</dd>
-          <dt><kbd>Click</kbd> on canvas</dt>
-          <dd>Select the organelle under the pointer.</dd>
-          <dt><kbd>Drag</kbd> on canvas</dt>
-          <dd>Orbit camera around the cell (left button) or pan (right button).</dd>
-          <dt><kbd>Scroll</kbd> on canvas</dt>
-          <dd>Zoom in / out.</dd>
-        </dl>`,
+        <p>The studio is mostly mouse-driven, but the following keyboard inputs help.</p>
+        <div class="manual-key-grid">
+          <div class="manual-key-row"><kbd>Esc</kbd><span>Close any active top-bar panel (Gallery / Library / Recents / Manual / Settings / Export sheet).</span></div>
+          <div class="manual-key-row"><kbd>Click</kbd><span>Select the organelle under the pointer.</span></div>
+          <div class="manual-key-row"><kbd>Drag</kbd><span>Orbit camera around the cell (left button) or pan (right button).</span></div>
+          <div class="manual-key-row"><kbd>Scroll</kbd><span>Zoom in / out.</span></div>
+        </div>`,
     },
     {
       id: "tips",
       title: "Tips & Tricks",
       body: `
+        <p>Combine modes for the best teaching output.</p>
+        ${fig("05-read-view.png", "Read View + Screenshot = a publication-ready annotated image in one click.", "", "en")}
         <ul>
           <li><strong>Read View + Screenshot</strong> gives you a publication-ready annotated image in one click.</li>
           <li><strong>Electron Microscope</strong> view looks exactly like a real SEM — perfect for textbook illustrations.</li>
@@ -189,13 +242,17 @@ export const MANUAL = {
           <dd>Open Settings and make sure <em>Process auto-play</em> is ON, or use the <strong>Next</strong> arrow in the HUD.</dd>
         </dl>`,
     },
-  ],
-  id: [
+  ];
+}
+
+function manualId() {
+  return [
     {
       id: "getting-started",
       title: "Memulai",
       body: `
-        <p>Cell Architecture Studio adalah eksplorer 3D lokal untuk <strong>16 spesimen biologi</strong>: sel jaringan, bakteri, virus, sel darah, dan organel berdiri sendiri. Semua dirender procedural di browser Anda — tanpa model eksternal, tanpa cloud.</p>
+        <p>Cell Architecture Studio adalah eksplorer 3D lokal untuk <strong>26 spesimen biologi</strong>: sel jaringan, sel imun, sel darah, sel reproduksi, bakteri, fungi, protista, virus, dan organel berdiri sendiri. Semua dirender procedural di browser Anda — tanpa model eksternal, tanpa cloud.</p>
+        ${fig("01-landing.png", "Tampilan landing: Plant Cell terpilih, sidebar dikelompokkan per kategori, gizmo XYZ kanan-atas, kontrol viewport di bagian bawah.", "Tampilan landing: Plant Cell terpilih, sidebar dikelompokkan per kategori, gizmo XYZ kanan-atas, kontrol viewport di bagian bawah.", "id")}
         <h3>Buka aplikasi</h3>
         <ol>
           <li>Pastikan server lokal jalan (<code>./run.sh</code> atau via tmux).</li>
@@ -213,10 +270,12 @@ export const MANUAL = {
       id: "interface-tour",
       title: "Tur Antarmuka",
       body: `
+        <p>Studio menggunakan layout tiga kolom dengan bilah atas dan strip mode di bawah.</p>
+        ${fig("01-landing.png", "Bilah atas (5 tab + lencana AKTIF), sidebar kiri (pustaka sel), viewport tengah (3D), panel detail kanan.", "Bilah atas (5 tab + lencana AKTIF), sidebar kiri (pustaka sel), viewport tengah (3D), panel detail kanan.", "id")}
         <h3>Bilah atas</h3>
         <p>Lima tab — <strong>Galeri</strong>, <strong>Pustaka</strong>, <strong>Terbaru</strong>, <strong>Panduan</strong>, <strong>Pengaturan</strong> — ditambah lencana API aktif/statis, pencarian, dan avatar.</p>
         <h3>Sidebar kiri</h3>
-        <p>Pustaka sel yang bisa di-scroll, dikelompokkan jadi 6 kategori: <em>Tissue cells</em>, <em>Specialised</em>, <em>Blood cells</em>, <em>Bacteria</em>, <em>Viruses</em>, <em>Standalone organelles</em>. Setiap item punya thumbnail 3D asli.</p>
+        <p>Pustaka sel yang bisa di-scroll, dikelompokkan jadi 9 kategori: <em>Tissue cells</em>, <em>Immune cells</em>, <em>Blood cells</em>, <em>Reproductive cells</em>, <em>Bacteria</em>, <em>Fungi</em>, <em>Protists</em>, <em>Viruses</em>, <em>Standalone organelles</em>. Setiap item punya thumbnail 3D asli.</p>
         <h3>Viewport utama</h3>
         <p>Render 3D procedural untuk spesimen terpilih. <strong>Drag</strong> untuk memutar, <strong>scroll</strong> untuk zoom, <strong>drag kanan</strong> untuk geser. Gizmo XYZ di kanan atas menunjukkan orientasi kamera.</p>
         <h3>Panel kanan</h3>
@@ -227,6 +286,13 @@ export const MANUAL = {
       title: "Mode Tampilan",
       body: `
         <p>Di bawah viewport ada 5 ubin mode. Klik untuk beralih.</p>
+        ${figRow([
+          { src: "04-animal-cell.png", en: "", id: "Tunggal — satu sel dengan glow halus." },
+          { src: "manual-fig-microscope.png", en: "", id: "Mikroskop — vignette + scanline." },
+          { src: "10-electron-microscope.png", en: "", id: "Mikroskop Elektron — SEM monokrom." },
+          { src: "08-process-mode.png", en: "", id: "Proses — timeline replikasi virus." },
+          { src: "02-atlas.png", en: "", id: "Atlas — semua 26 spesimen sekaligus." },
+        ], "id")}
         <dl>
           <dt>Tunggal</dt>
           <dd>Default. Satu sel di tengah panggung dengan glow halus.</dd>
@@ -235,9 +301,9 @@ export const MANUAL = {
           <dt>Mikroskop Elektron</dt>
           <dd>Render SEM/TEM monokrom asli — material override + flat shading, bloom mati.</dd>
           <dt>Proses</dt>
-          <dd>Timeline siklus virus (hanya untuk 5 virus). Auto-play 5 tahap dengan narasi per-tahap.</dd>
+          <dd>Timeline siklus virus (hanya untuk 6 virus). Auto-play 5 tahap dengan narasi per-tahap.</dd>
           <dt>Atlas</dt>
-          <dd>Semua 16 spesimen mengorbit pada cincin bersama dengan garis link.</dd>
+          <dd>Semua 26 spesimen mengorbit pada cincin bersama dengan garis link.</dd>
         </dl>
         <p>Tip: deep-link <code>?mode=electron</code> langsung membuka mode tersebut.</p>`,
     },
@@ -245,7 +311,8 @@ export const MANUAL = {
       id: "controls",
       title: "Kontrol Viewport",
       body: `
-        <p>Pil kontrol mengambang di bawah viewport berisi 7 alat:</p>
+        <p>Pil kontrol mengambang di bawah viewport berisi 7 alat.</p>
+        ${fig("06-cross-section.png", "Bawah: pil kontrol berisi 7 alat. Di atas pil: panel penampang lintang untuk slicing XYZ. Kanan-atas: gizmo sumbu.", "Bawah: pil kontrol berisi 7 alat. Di atas pil: panel penampang lintang untuk slicing XYZ. Kanan-atas: gizmo sumbu.", "id")}
         <dl>
           <dt>Putar</dt>
           <dd>Aktifkan/matikan auto-rotate (putaran lambat terus-menerus).</dd>
@@ -267,8 +334,18 @@ export const MANUAL = {
       id: "top-panels",
       title: "Panel Bilah Atas",
       body: `
+        <p>Setiap tab bilah-atas membuka panel overlay layar penuh. Klik tab aktif lagi atau tekan <kbd>Esc</kbd> untuk menutup.</p>
+        ${figRow([
+          { src: "03-gallery.png", en: "", id: "Galeri — semua 26 spesimen sebagai kartu." },
+          { src: "manual-fig-library.png", en: "", id: "Pustaka — daftar terkategori dengan pencarian." },
+          { src: "manual-fig-recents.png", en: "", id: "Terbaru — 12 spesimen terakhir yang dilihat." },
+        ], "id")}
+        ${figRow([
+          { src: "13-manual-english.png", en: "", id: "Panduan — panel ini (11 bagian)." },
+          { src: "15-settings-panel.png", en: "", id: "Pengaturan — tema, bahasa, autoplay." },
+        ], "id")}
         <h3>Galeri</h3>
-        <p>Tampilan grid semua 16 spesimen dengan thumbnail + lencana kategori. Klik kartu apapun untuk membuka sel tersebut.</p>
+        <p>Tampilan grid semua 26 spesimen dengan thumbnail + lencana kategori. Klik kartu apapun untuk membuka sel tersebut.</p>
         <h3>Pustaka</h3>
         <p>Daftar terkategori dengan kotak pencarian langsung. Pencarian cocok dengan label, kingdom, ringkasan, dan nama organel.</p>
         <h3>Terbaru</h3>
@@ -276,14 +353,17 @@ export const MANUAL = {
         <h3>Panduan</h3>
         <p>Panel ini.</p>
         <h3>Pengaturan</h3>
-        <p>Pemilih Tema (Gelap / Terang / Sistem), Bahasa (Inggris / Indonesia), toggle Putar otomatis Proses, toggle Efek bloom, Setel ulang.</p>
-        <p>Tekan <kbd>Esc</kbd> untuk menutup panel yang terbuka.</p>`,
+        <p>Pemilih Tema (Gelap / Terang / Sistem), Bahasa (Inggris / Indonesia), toggle Putar otomatis Proses, toggle Efek bloom, Setel ulang.</p>`,
     },
     {
       id: "virus-lifecycle",
       title: "Siklus Virus (Mode Proses)",
       body: `
-        <p>Masing-masing dari 5 virus punya siklus hidup 5 tahap. Beralih ke mode <strong>Proses</strong> untuk memutar.</p>
+        <p>Masing-masing dari 6 virus punya siklus hidup 5 tahap. Beralih ke mode <strong>Proses</strong> untuk memutar.</p>
+        ${figRow([
+          { src: "08-process-mode.png", en: "", id: "SARS-CoV-2 dalam mode Proses (tahap Replikasi)." },
+          { src: "09-phage-process.png", en: "", id: "Bakteriofag T4 menyuntikkan DNA ke membran inang." },
+        ], "id")}
         <dl>
           <dt>Tahap 1 — Pelekatan</dt>
           <dd>Virus mengikat reseptor sel inang (ACE2, CD4, CAR, asam sialat, LPS…).</dd>
@@ -302,7 +382,11 @@ export const MANUAL = {
       id: "cross-section",
       title: "Penampang Lintang",
       body: `
-        <p>Klik <strong>Penampang</strong> di pil kontrol viewport. Panel muncul dengan:</p>
+        <p>Klik <strong>Penampang</strong> di pil kontrol viewport untuk memotong sel terbuka.</p>
+        ${figRow([
+          { src: "04-animal-cell.png", en: "", id: "Animal Cell — membran lengkap, organel sebagian tersembunyi." },
+          { src: "06-cross-section.png", en: "", id: "Sel yang sama dipotong di Y 60% — nukleus + mitokondria + Golgi terlihat." },
+        ], "id")}
         <ul>
           <li><strong>Pemilih sumbu</strong>: Y (slice horizontal), X (samping), Z (depan).</li>
           <li><strong>Slider</strong>: 100% = tanpa potongan, 0% = potongan penuh dari sisi positif.</li>
@@ -323,33 +407,36 @@ export const MANUAL = {
 &theme=dark|light|system
 &lang=en|id
 &panel=gallery|library|recents|manual|settings</code></pre>
-        <p>Contoh:</p>
+        ${figRow([
+          { src: "09-phage-process.png", en: "", id: "?cell=bacteriophage&mode=process — siklus T4 phage" },
+          { src: "12-light-theme-indonesian.png", en: "", id: "?theme=light&lang=id — tema terang + Indonesia" },
+        ], "id")}
+        <p>Contoh lain:</p>
         <ul>
-          <li><code>?cell=bacteriophage&amp;mode=process</code> — putar siklus fag T4</li>
           <li><code>?cell=hiv&amp;mode=standalone&amp;section=y:50</code> — virion HIV teriris</li>
-          <li><code>?theme=light&amp;lang=id</code> — tema terang + Indonesia</li>
+          <li><code>?cell=animal-cell&amp;read=1</code> — mode baca dengan organel beranotasi</li>
           <li><code>?panel=gallery</code> — buka Galeri langsung</li>
+          <li><code>?panel=manual&amp;lang=id</code> — buka panduan ini dalam Bahasa Indonesia</li>
         </ul>`,
     },
     {
       id: "keyboard-shortcuts",
       title: "Pintasan Keyboard",
       body: `
-        <dl>
-          <dt><kbd>Esc</kbd></dt>
-          <dd>Tutup panel bilah atas yang aktif (Galeri / Pustaka / Terbaru / Panduan / Pengaturan / sheet Ekspor).</dd>
-          <dt><kbd>Klik</kbd> pada canvas</dt>
-          <dd>Pilih organel di bawah kursor.</dd>
-          <dt><kbd>Drag</kbd> pada canvas</dt>
-          <dd>Putar kamera di sekitar sel (tombol kiri) atau geser (tombol kanan).</dd>
-          <dt><kbd>Scroll</kbd> pada canvas</dt>
-          <dd>Zoom masuk / keluar.</dd>
-        </dl>`,
+        <p>Studio kebanyakan digerakkan dengan mouse, tapi input keyboard berikut membantu.</p>
+        <div class="manual-key-grid">
+          <div class="manual-key-row"><kbd>Esc</kbd><span>Tutup panel bilah atas yang aktif (Galeri / Pustaka / Terbaru / Panduan / Pengaturan / sheet Ekspor).</span></div>
+          <div class="manual-key-row"><kbd>Klik</kbd><span>Pilih organel di bawah kursor.</span></div>
+          <div class="manual-key-row"><kbd>Drag</kbd><span>Putar kamera di sekitar sel (tombol kiri) atau geser (tombol kanan).</span></div>
+          <div class="manual-key-row"><kbd>Scroll</kbd><span>Zoom masuk / keluar.</span></div>
+        </div>`,
     },
     {
       id: "tips",
       title: "Tips & Trik",
       body: `
+        <p>Kombinasikan mode untuk hasil pengajaran terbaik.</p>
+        ${fig("05-read-view.png", "Mode Baca + Tangkapan = gambar beranotasi siap-publikasi dalam satu klik.", "Mode Baca + Tangkapan = gambar beranotasi siap-publikasi dalam satu klik.", "id")}
         <ul>
           <li><strong>Mode Baca + Tangkapan</strong> menghasilkan gambar beranotasi siap-publikasi dalam satu klik.</li>
           <li>Tampilan <strong>Mikroskop Elektron</strong> terlihat persis seperti SEM asli — sempurna untuk ilustrasi buku ajar.</li>
@@ -375,9 +462,14 @@ export const MANUAL = {
           <dd>Buka Pengaturan dan pastikan <em>Putar otomatis Proses</em> ON, atau gunakan panah <strong>Berikutnya</strong> di HUD.</dd>
         </dl>`,
     },
-  ],
+  ];
+}
+
+export const MANUAL = {
+  en: manualEn(),
+  id: manualId(),
 };
 
 export function manualSections(lang) {
-  return MANUAL[lang] || MANUAL.en;
+  return (lang === "id" ? MANUAL.id : MANUAL.en);
 }

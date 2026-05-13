@@ -1535,6 +1535,101 @@ body[data-theme="light"] .tab-panel { background: rgba(245, 246, 247, 0.94); }
   .manual-toc button { white-space: nowrap; }
 }
 
+/* Manual figures + illustrations */
+.manual-figure {
+  margin: 14px 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.manual-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.manual-figure figcaption,
+.manual-figure-grid figcaption {
+  font: 400 11.5px var(--font-ui);
+  color: var(--text-muted);
+  line-height: 1.4;
+  font-style: italic;
+}
+.manual-figure-grid {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+.manual-figure-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.manual-figure-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.manual-figure-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.manual-figure-grid-5 { grid-template-columns: repeat(5, 1fr); }
+.manual-figure-grid figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.manual-figure-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+}
+.manual-figure-grid figcaption {
+  font-size: 11px;
+  text-align: left;
+}
+@media (max-width: 720px) {
+  .manual-figure-grid-3,
+  .manual-figure-grid-4,
+  .manual-figure-grid-5 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Manual keyboard shortcuts grid */
+.manual-key-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0 18px;
+}
+.manual-key-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.manual-key-row kbd {
+  justify-self: start;
+  display: inline-block;
+  padding: 4px 12px;
+  font: 600 11px var(--font-mono);
+  background: var(--bg-3);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  color: var(--text);
+  box-shadow: 0 2px 0 var(--border-strong);
+  min-width: 60px;
+  text-align: center;
+}
+.manual-key-row span {
+  font: 400 12.5px var(--font-ui);
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
 /* ============================================================
    Section view panel + Process overlay + Hover tooltip
    ============================================================ */
