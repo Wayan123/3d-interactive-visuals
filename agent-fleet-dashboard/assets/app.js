@@ -39,6 +39,20 @@ function saveRecents(list) {
   } catch (_) { /* ignore */ }
 }
 
+function loadBookmarks() {
+  try {
+    const raw = localStorage.getItem(BOOKMARKS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (_) { /* ignore */ }
+  return [];
+}
+
+function saveBookmarks(list) {
+  try {
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(list));
+  } catch (_) { /* ignore */ }
+}
+
 const initPrefs = loadPrefs();
 const state = {
   atlas: null,
@@ -71,6 +85,14 @@ const state = {
   activePanel: null,
   recents: loadRecents(),
   librarySearch: "",
+  // Search overlay state
+  bookmarks: loadBookmarks(),
+  searchQuery: "",
+  searchActiveIndex: 0,
+  searchOpen: false,
+  avatarMenuOpen: false,
+  projectMenuOpen: false,
+  aboutOpen: false,
 };
 
 const dom = {
@@ -162,6 +184,21 @@ const dom = {
   settingsResetBtn: document.getElementById("settingsResetBtn"),
   exportSubtitle: document.getElementById("exportSubtitle"),
   cadHelp: document.getElementById("cadHelp"),
+  // Search overlay
+  searchOverlay: document.getElementById("searchOverlay"),
+  searchInput: document.getElementById("searchInput"),
+  searchResults: document.getElementById("searchResults"),
+  topbarSearchBtn: document.getElementById("topbarSearchBtn"),
+  searchShortcut: document.getElementById("searchShortcut"),
+  // Avatar menu
+  topbarAvatarBtn: document.getElementById("topbarAvatarBtn"),
+  avatarMenu: document.getElementById("avatarMenu"),
+  // Project bookmarks menu
+  projectMenu: document.getElementById("projectMenu"),
+  projectBookmarksList: document.getElementById("projectBookmarksList"),
+  // About dialog
+  aboutDialog: document.getElementById("aboutDialog"),
+  aboutClose: document.getElementById("aboutClose"),
 };
 
 let bioScene = null;
@@ -1079,6 +1116,9 @@ function bindControls() {
   dom.orgLabelToggle.addEventListener("change", (e) => {
     if (!state.selectedComponentId) return;
     state.componentLabelOn[state.selectedComponentId] = e.target.checked;
+    const cell = cellById(state.selectedCellId);
+    const comp = cell?.components.find((c) => c.id === state.selectedComponentId);
+    bioScene?.setOrganelleLabel(state.selectedComponentId, comp?.label || state.selectedComponentId, comp?.color || "#00d4aa", e.target.checked);
   });
 
   dom.compareLeft.addEventListener("click", () => assignCompareSlot("left"));
@@ -1093,9 +1133,14 @@ function bindControls() {
     else openPanel(name);
   }));
   document.querySelectorAll("[data-close-panel]").forEach((b) => b.addEventListener("click", closePanel));
-  // ESC closes panel
+  // ESC closes panel/menu/search/about
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && state.activePanel) closePanel();
+    if (e.key !== "Escape") return;
+    if (state.searchOpen) { closeSearch(); return; }
+    if (state.aboutOpen) { closeAbout(); return; }
+    if (state.avatarMenuOpen) { closeAvatarMenu(); return; }
+    if (state.projectMenuOpen) { closeProjectMenu(); return; }
+    if (state.activePanel) closePanel();
   });
   // Library search
   dom.librarySearchInput?.addEventListener("input", (e) => {
@@ -1134,11 +1179,60 @@ function bindControls() {
     renderSettings();
   });
 
-  dom.newProjectBtn.addEventListener("click", () => {
-    state.compareLeftId = null;
-    state.compareRightId = null;
-    setMode("standalone");
-    selectCell(state.atlas.cells[0]?.id, { focus: true });
+  dom.newProjectBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleProjectMenu();
+  });
+  dom.projectMenu?.querySelectorAll("[data-project-action]").forEach((b) => {
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleProjectAction(b.dataset.projectAction);
+    });
+  });
+
+  // Search overlay
+  dom.topbarSearchBtn?.addEventListener("click", openSearch);
+  dom.searchInput?.addEventListener("input", (e) => {
+    state.searchQuery = e.target.value;
+    state.searchActiveIndex = 0;
+    renderSearchResults();
+  });
+  dom.searchInput?.addEventListener("keydown", handleSearchKey);
+  dom.searchOverlay?.addEventListener("click", (e) => {
+    if (e.target === dom.searchOverlay) closeSearch();
+  });
+
+  // Avatar menu
+  dom.topbarAvatarBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleAvatarMenu();
+  });
+  dom.avatarMenu?.querySelectorAll("[data-avatar-action]").forEach((b) => {
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleAvatarAction(b.dataset.avatarAction);
+    });
+  });
+
+  // About dialog
+  dom.aboutClose?.addEventListener("click", closeAbout);
+  dom.aboutDialog?.addEventListener("click", (e) => {
+    if (e.target === dom.aboutDialog) closeAbout();
+  });
+
+  // Click outside any menu to close it
+  document.addEventListener("click", () => {
+    if (state.avatarMenuOpen) closeAvatarMenu();
+    if (state.projectMenuOpen) closeProjectMenu();
+  });
+
+  // Keyboard: Cmd/Ctrl + K opens search
+  document.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      if (state.searchOpen) closeSearch();
+      else openSearch();
+    }
   });
 }
 
@@ -1173,6 +1267,228 @@ function renderFallback(error) {
   dom.fallback.innerHTML = grid;
   dom.fallback.querySelectorAll("button").forEach((btn) =>
     btn.addEventListener("click", () => selectCell(btn.dataset.cellId, { focus: false })));
+}
+
+// ---------- search overlay ----------------------------------------------
+
+function openSearch() {
+  state.searchOpen = true;
+  state.searchQuery = "";
+  state.searchActiveIndex = 0;
+  if (dom.searchInput) dom.searchInput.value = "";
+  dom.searchOverlay.hidden = false;
+  setTimeout(() => dom.searchInput?.focus(), 30);
+  renderSearchResults();
+}
+
+function closeSearch() {
+  state.searchOpen = false;
+  dom.searchOverlay.hidden = true;
+}
+
+function renderSearchResults() {
+  if (!dom.searchResults) return;
+  const q = state.searchQuery.trim().toLowerCase();
+  const cats = state.atlas.categories || [];
+  const catById = {};
+  cats.forEach((c) => c.cells.forEach((id) => { catById[id] = c.label; }));
+  let cells = state.atlas.cells.slice();
+  if (q) {
+    cells = cells.filter((c) => matchesSearch(c, q));
+  }
+  // limit to ~30 to avoid huge dropdowns
+  cells = cells.slice(0, 30);
+  if (!cells.length) {
+    dom.searchResults.innerHTML = `<p class="search-empty">${escapeHtml(t("search.empty", state.lang))}</p>`;
+    return;
+  }
+  if (state.searchActiveIndex >= cells.length) state.searchActiveIndex = 0;
+  dom.searchResults.innerHTML = cells.map((cell, i) => {
+    const thumb = state.thumbnails[cell.id];
+    const bg = thumb ? `style="background-image:url(${thumb})"` : "";
+    const cat = catById[cell.id] || cell.kingdom;
+    return `
+      <button class="search-result ${i === state.searchActiveIndex ? "is-active" : ""}" data-cell-id="${escapeAttr(cell.id)}" data-search-index="${i}" role="option">
+        <span class="thumb" ${bg}></span>
+        <span class="meta">
+          <strong>${escapeHtml(cell.label)}</strong>
+          <small>${escapeHtml(cell.kingdom)} · ${escapeHtml(cell.size)}</small>
+        </span>
+        <span class="cat-pill">${escapeHtml(cat)}</span>
+      </button>`;
+  }).join("");
+  dom.searchResults.querySelectorAll(".search-result").forEach((el) => {
+    el.addEventListener("mouseenter", () => {
+      state.searchActiveIndex = +el.dataset.searchIndex;
+      dom.searchResults.querySelectorAll(".search-result").forEach((x) => x.classList.toggle("is-active", x === el));
+    });
+    el.addEventListener("click", () => {
+      selectCell(el.dataset.cellId, { focus: true });
+      closeSearch();
+    });
+  });
+}
+
+function handleSearchKey(e) {
+  if (!state.searchOpen) return;
+  const items = dom.searchResults.querySelectorAll(".search-result");
+  if (e.key === "Escape") { e.preventDefault(); closeSearch(); return; }
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    state.searchActiveIndex = Math.min(items.length - 1, state.searchActiveIndex + 1);
+    renderSearchResults();
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    state.searchActiveIndex = Math.max(0, state.searchActiveIndex - 1);
+    renderSearchResults();
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    const active = items[state.searchActiveIndex];
+    if (active) {
+      selectCell(active.dataset.cellId, { focus: true });
+      closeSearch();
+    }
+  }
+}
+
+// ---------- avatar menu --------------------------------------------------
+
+function toggleAvatarMenu() {
+  state.avatarMenuOpen = !state.avatarMenuOpen;
+  dom.avatarMenu.hidden = !state.avatarMenuOpen;
+  dom.topbarAvatarBtn?.setAttribute("aria-expanded", state.avatarMenuOpen);
+}
+
+function closeAvatarMenu() {
+  state.avatarMenuOpen = false;
+  dom.avatarMenu.hidden = true;
+  dom.topbarAvatarBtn?.setAttribute("aria-expanded", "false");
+}
+
+function handleAvatarAction(action) {
+  closeAvatarMenu();
+  if (action === "about") openAbout();
+  else if (action === "github") window.open("https://github.com/Wayan123/3d-interactive-visuals", "_blank", "noopener");
+  else if (action === "toggle-theme") {
+    const order = ["dark", "light", "system"];
+    const next = order[(order.indexOf(state.theme) + 1) % order.length];
+    applyTheme(next);
+  } else if (action === "toggle-lang") {
+    applyLang(state.lang === "en" ? "id" : "en");
+  }
+}
+
+// ---------- about dialog -------------------------------------------------
+
+function openAbout() {
+  state.aboutOpen = true;
+  dom.aboutDialog.hidden = false;
+}
+
+function closeAbout() {
+  state.aboutOpen = false;
+  dom.aboutDialog.hidden = true;
+}
+
+// ---------- project / bookmarks menu -------------------------------------
+
+function toggleProjectMenu() {
+  state.projectMenuOpen = !state.projectMenuOpen;
+  dom.projectMenu.hidden = !state.projectMenuOpen;
+  dom.newProjectBtn?.setAttribute("aria-expanded", state.projectMenuOpen);
+  if (state.projectMenuOpen) renderBookmarks();
+}
+
+function closeProjectMenu() {
+  state.projectMenuOpen = false;
+  dom.projectMenu.hidden = true;
+  dom.newProjectBtn?.setAttribute("aria-expanded", "false");
+}
+
+function renderBookmarks() {
+  if (!dom.projectBookmarksList) return;
+  if (!state.bookmarks.length) {
+    dom.projectBookmarksList.innerHTML = `<li class="project-empty">${escapeHtml(t("project.empty", state.lang))}</li>`;
+    return;
+  }
+  dom.projectBookmarksList.innerHTML = state.bookmarks.map((b, i) => {
+    const cell = cellById(b.cellId);
+    const sub = `${cell?.label || b.cellId} · ${b.mode}${b.componentId ? " · " + b.componentId : ""}`;
+    return `
+      <li class="project-bookmark-row">
+        <button class="project-bookmark-load" data-bookmark-index="${i}" type="button">
+          <strong>${escapeHtml(b.name)}</strong>
+          <small>${escapeHtml(sub)}</small>
+        </button>
+        <button class="project-bookmark-del" data-bookmark-del="${i}" type="button" aria-label="Delete">×</button>
+      </li>`;
+  }).join("");
+  dom.projectBookmarksList.querySelectorAll(".project-bookmark-load").forEach((el) => {
+    el.addEventListener("click", () => applyBookmark(+el.dataset.bookmarkIndex));
+  });
+  dom.projectBookmarksList.querySelectorAll(".project-bookmark-del").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      removeBookmark(+el.dataset.bookmarkDel);
+    });
+  });
+}
+
+function handleProjectAction(action) {
+  if (action === "reset") {
+    state.compareLeftId = null;
+    state.compareRightId = null;
+    setMode("standalone");
+    selectCell(state.atlas.cells[0]?.id, { focus: true });
+    closeProjectMenu();
+  } else if (action === "save") {
+    const cell = cellById(state.selectedCellId);
+    const defaultName = `${cell?.label || ""} — ${state.mode}${state.selectedComponentId ? " · " + state.selectedComponentId : ""}`;
+    const name = prompt(t("project.savePrompt", state.lang), defaultName);
+    if (!name) return;
+    const entry = {
+      name: name.trim(),
+      cellId: state.selectedCellId,
+      mode: state.mode,
+      componentId: state.selectedComponentId,
+      readView: state.readView,
+      ts: Date.now(),
+    };
+    state.bookmarks.unshift(entry);
+    state.bookmarks = state.bookmarks.slice(0, BOOKMARKS_MAX);
+    saveBookmarks(state.bookmarks);
+    renderBookmarks();
+  } else if (action === "clear") {
+    if (state.bookmarks.length && confirm(t("project.clear", state.lang) + " ?")) {
+      state.bookmarks = [];
+      saveBookmarks(state.bookmarks);
+      renderBookmarks();
+    }
+  }
+}
+
+function applyBookmark(index) {
+  const b = state.bookmarks[index];
+  if (!b) return;
+  if (b.cellId) selectCell(b.cellId, { focus: true });
+  if (b.mode) setMode(b.mode);
+  if (b.componentId) selectComponent(b.componentId);
+  if (b.readView !== state.readView) toggleReadView();
+  closeProjectMenu();
+}
+
+function removeBookmark(index) {
+  state.bookmarks.splice(index, 1);
+  saveBookmarks(state.bookmarks);
+  renderBookmarks();
+}
+
+// ---------- platform shortcut hint ---------------------------------------
+
+function updateShortcutHint() {
+  if (!dom.searchShortcut) return;
+  const isMac = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || "");
+  dom.searchShortcut.textContent = isMac ? "⌘ K" : "Ctrl K";
 }
 
 // ---------- startup ------------------------------------------------------
@@ -1220,6 +1536,7 @@ async function main() {
   bindControls();
   // Now that DOM is wired and atlas loaded, apply translations
   applyLang(state.lang);
+  updateShortcutHint();
 
   try {
     const { THREE, OrbitControls, postFx } = await loadThree();
@@ -1259,6 +1576,20 @@ async function main() {
     if (state.readView) {
       dom.readViewBtn.classList.add("is-active");
       bioScene.setReadView(true);
+    }
+    // Deep-link helpers for new features (test/demo)
+    if (params.get("openSearch") === "1") setTimeout(openSearch, 250);
+    if (params.get("openAvatar") === "1") setTimeout(toggleAvatarMenu, 250);
+    if (params.get("openProject") === "1") setTimeout(toggleProjectMenu, 250);
+    if (params.get("openAbout") === "1") setTimeout(openAbout, 250);
+    if (params.get("showLabel") === "1" && state.selectedComponentId) {
+      setTimeout(() => {
+        const cell = cellById(state.selectedCellId);
+        const comp = cell?.components.find((c) => c.id === state.selectedComponentId);
+        bioScene?.setOrganelleLabel(state.selectedComponentId, comp?.label || state.selectedComponentId, comp?.color || "#00d4aa", true);
+        state.componentLabelOn[state.selectedComponentId] = true;
+        if (dom.orgLabelToggle) dom.orgLabelToggle.checked = true;
+      }, 400);
     }
     if (state.sectionOpen) {
       dom.sectionBtn.classList.add("is-active");

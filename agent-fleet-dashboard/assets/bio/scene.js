@@ -269,6 +269,16 @@ export class BioScene {
 
   setSelected(id, { focus = true } = {}) {
     if (!this.cells.has(id)) return;
+    // Clean up labels of previous selection
+    const prev = this.cells.get(this.selectedId);
+    if (prev?.organelleLabels) {
+      Object.entries(prev.organelleLabels).forEach(([cid, sprite]) => {
+        prev.group.remove(sprite);
+        if (sprite.material?.map) sprite.material.map.dispose();
+        sprite.material?.dispose();
+      });
+      prev.organelleLabels = {};
+    }
     this.selectedId = id;
     this.focusedComponentId = null;
     this._refreshVisibility();
@@ -587,6 +597,82 @@ export class BioScene {
     const obj = entry.group.userData.componentMap?.[componentId];
     if (!obj) return;
     obj.visible = visible;
+  }
+
+  setOrganelleLabel(componentId, label, color, on) {
+    const entry = this.cells.get(this.selectedId);
+    if (!entry) return;
+    const map = entry.group.userData.componentMap || {};
+    const obj = map[componentId];
+    if (!obj) return;
+    if (!entry.organelleLabels) entry.organelleLabels = {};
+    // remove existing if present
+    const existing = entry.organelleLabels[componentId];
+    if (existing) {
+      entry.group.remove(existing);
+      if (existing.material?.map) existing.material.map.dispose();
+      existing.material?.dispose();
+      delete entry.organelleLabels[componentId];
+    }
+    if (!on) return;
+    // compute bbox center of the organelle to place label above it
+    const bbox = new this.THREE.Box3().setFromObject(obj);
+    if (!isFinite(bbox.min.x)) return;
+    const center = new this.THREE.Vector3();
+    bbox.getCenter(center);
+    const size = new this.THREE.Vector3();
+    bbox.getSize(size);
+    const yOffset = size.y * 0.6 + 0.12;
+    // build canvas-painted sprite
+    const sprite = this._makeOrganelleSprite(label, color);
+    // Convert world position to local (group is at group.position; obj inside is in local already)
+    // Since obj is a child of group, its position is local. center from setFromObject is WORLD.
+    // We need local relative to group; subtract group.position.
+    const worldGroupPos = new this.THREE.Vector3();
+    entry.group.getWorldPosition(worldGroupPos);
+    const local = center.clone().sub(worldGroupPos);
+    // Compensate for group scale
+    const groupScale = entry.cell.scale || 1;
+    local.multiplyScalar(1 / groupScale);
+    sprite.position.copy(local);
+    sprite.position.y += yOffset / groupScale;
+    sprite.userData.role = "organelle-label";
+    entry.group.add(sprite);
+    entry.organelleLabels[componentId] = sprite;
+  }
+
+  _makeOrganelleSprite(text, color) {
+    const THREE = this.THREE;
+    const canvas = document.createElement("canvas");
+    canvas.width = 384; canvas.height = 96;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 384, 96);
+    // pill background
+    ctx.fillStyle = "rgba(10, 14, 20, 0.86)";
+    const r = 28;
+    ctx.beginPath();
+    ctx.moveTo(r + 8, 28);
+    ctx.arcTo(376 - 8, 28, 376 - 8, 68, r);
+    ctx.arcTo(376 - 8, 68, 8, 68, r);
+    ctx.arcTo(8, 68, 8, 28, r);
+    ctx.arcTo(8, 28, 376 - 8, 28, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 26px Inter, Aptos, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, 192, 48, 320);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: tex, transparent: true, depthTest: false, depthWrite: false,
+    }));
+    sprite.scale.set(1.2, 0.3, 1);
+    return sprite;
   }
 
   isolateComponent(componentId) {
