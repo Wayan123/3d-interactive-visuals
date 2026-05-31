@@ -38,3 +38,8 @@ tmux-*.log
 
 # Large third-party scrape (not needed for app)
 doc_support/
+
+# Local runtime helpers
+.server.pid
+.server.log
+.start_server.sh
