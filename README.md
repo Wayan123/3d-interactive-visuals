@@ -64,6 +64,14 @@ Atom  →  Organelle  →  Cell  →  Virus  →  Planet  →  Star  →  Galaxy
 
 ## Screenshots
 
+### Cosmos scale — Solar System (Sun + 8 planets + Moon)
+
+![Solar System](agent-fleet-dashboard/docs/screenshots/demo-solar-system.png)
+
+### Atomic scale — Hydrogen Atom (nucleus + orbitals + electron cloud)
+
+![Hydrogen Atom](agent-fleet-dashboard/docs/screenshots/demo-hydrogen-atom.png)
+
 ### Landing (Plant Cell · Dark · English)
 
 ![Landing](agent-fleet-dashboard/docs/screenshots/01-landing.png)

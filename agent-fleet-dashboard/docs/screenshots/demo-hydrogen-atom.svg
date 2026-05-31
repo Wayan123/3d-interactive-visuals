@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="system-ui,Segoe UI,Roboto,sans-serif">
+  <defs>
+    <radialGradient id="bgA" cx="50%" cy="46%" r="75%">
+      <stop offset="0%" stop-color="#0c1626"/><stop offset="65%" stop-color="#080d18"/><stop offset="100%" stop-color="#04060c"/>
+    </radialGradient>
+    <radialGradient id="cloud" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6eefff" stop-opacity="0.32"/><stop offset="55%" stop-color="#6eefff" stop-opacity="0.10"/><stop offset="100%" stop-color="#6eefff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nuc" cx="50%" cy="42%" r="60%">
+      <stop offset="0%" stop-color="#ffd0c8"/><stop offset="55%" stop-color="#ff6f61"/><stop offset="100%" stop-color="#a8281d"/>
+    </radialGradient>
+    <radialGradient id="elec" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#d6f8ff"/><stop offset="60%" stop-color="#6eefff"/><stop offset="100%" stop-color="#00a6d6"/>
+    </radialGradient>
+    <radialGradient id="eGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6eefff" stop-opacity="0.7"/><stop offset="100%" stop-color="#6eefff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgA)"/>
+  <g fill="#bfe9ff">
+    <circle cx="140" cy="90" r="1.3" opacity=".7"/><circle cx="360" cy="60" r="1" opacity=".5"/><circle cx="980" cy="80" r="1.4" opacity=".8"/>
+    <circle cx="1100" cy="160" r="1" opacity=".5"/><circle cx="90" cy="500" r="1.2" opacity=".6"/><circle cx="1120" cy="520" r="1.2" opacity=".6"/>
+    <circle cx="520" cy="560" r="1" opacity=".4"/><circle cx="760" cy="540" r="1.3" opacity=".7"/>
+  </g>
+
+  <text x="60" y="64" fill="#e9f7fc" font-size="30" font-weight="700">Scale Explorer — Hydrogen Atom</text>
+  <text x="60" y="92" fill="#7f9bb0" font-size="16">Proton nucleus · 1s probability cloud · Bohr orbit guides · animated electron</text>
+
+  <!-- atom centered -->
+  <g transform="translate(600 340)">
+    <!-- probability cloud -->
+    <circle cx="0" cy="0" r="250" fill="url(#cloud)"/>
+    <!-- three orbit guide rings (tilted ellipses) -->
+    <g fill="none" stroke="#7dfce0" stroke-width="2.2" opacity="0.55">
+      <ellipse cx="0" cy="0" rx="210" ry="80"/>
+      <ellipse cx="0" cy="0" rx="80" ry="210"/>
+      <ellipse cx="0" cy="0" rx="180" ry="150" transform="rotate(36)"/>
+    </g>
+    <!-- electron trail + electron on the first ring -->
+    <path d="M 210 0 A 210 80 0 0 1 40 70" fill="none" stroke="#6eefff" stroke-width="3" opacity="0.6" stroke-linecap="round"/>
+    <circle cx="210" cy="0" r="34" fill="url(#eGlow)"/>
+    <circle cx="210" cy="0" r="15" fill="url(#elec)"/>
+    <!-- nucleus -->
+    <circle cx="0" cy="0" r="74" fill="url(#eGlow)" opacity=".25"/>
+    <circle cx="0" cy="0" r="40" fill="url(#nuc)"/>
+    <circle cx="-12" cy="-12" r="9" fill="#ffd0c8" opacity=".7"/>
+  </g>
+
+  <!-- labels with leader lines -->
+  <g font-size="15" fill="#cfe9f2">
+    <line x1="600" y1="340" x2="600" y2="470" stroke="#ff6f61" stroke-width="1" opacity=".6"/>
+    <text x="600" y="492" text-anchor="middle" fill="#ff8a7a">Proton nucleus (+)</text>
+    <line x1="810" y1="340" x2="900" y2="250" stroke="#6eefff" stroke-width="1" opacity=".6"/>
+    <text x="905" y="246" fill="#6eefff">Electron (−)</text>
+    <line x1="430" y1="250" x2="330" y2="180" stroke="#7dfce0" stroke-width="1" opacity=".6"/>
+    <text x="325" y="176" text-anchor="end" fill="#7dfce0">Orbit guide</text>
+    <line x1="800" y1="470" x2="900" y2="520" stroke="#6eefff" stroke-width="1" opacity=".5"/>
+    <text x="905" y="525" fill="#9bd6e6">1s probability cloud</text>
+  </g>
+
+  <text x="1140" y="600" fill="#557081" font-size="13" text-anchor="end">Conceptual model, not literal orbital mechanics · Scale Explorer v0.8</text>
+</svg>
