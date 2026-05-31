@@ -1,6 +1,6 @@
-# Cell Architecture Studio — app
+# Scale Explorer — app
 
-> Local 3D explorer untuk **26 specimen biologi**. 3 tema (Dark / Light / System), bilingual English + Bahasa Indonesia, **5 top-bar panels** (Gallery / Library / Recents / Manual / Settings) termasuk **in-app User Manual bilingual**. 100 % procedural Three.js. Backend Python stdlib only.
+> Local 3D explorer from **atom to galaxy**: **39 specimens** across 14 categories (atoms, cells, viruses, organelles, the Sun, planets, the Moon, and galaxies). 3 themes (Dark / Light / System), bilingual English + Bahasa Indonesia, **5 top-bar panels** (Gallery / Library / Recents / Manual / Settings) including an **in-app bilingual User Manual**. 100 % procedural Three.js. Backend Python stdlib only.
 
 ```text
 http://127.0.0.1:8877/
@@ -12,7 +12,7 @@ http://127.0.0.1:8877/
 
 ## Fitur lengkap
 
-- **26 specimens** di 9 kategori (tissue + immune + blood + reproductive + bacteria + fungi + protists + viruses + organelles).
+- **39 specimens** di 14 kategori (tissue + immune + blood + reproductive + bacteria + fungi + protists + viruses + organelles + atoms + stars + planets + moons + galaxies).
 - **6 view modes**: Standalone · Microscope · Electron Microscope · **Process** (virus lifecycle) · Atlas · Compare.
 - **5 top-bar panels**: Gallery, Library (with search), Recents (localStorage), **Manual** (bilingual 11 sections), Settings.
 - **Read View** dengan dashed leader-lines + label per organel.
@@ -26,7 +26,7 @@ http://127.0.0.1:8877/
 ## Inventory
 
 ```text
-26 cells across 9 categories:
+39 specimens across 14 categories:
   Tissue cells (6):       plant-cell, animal-cell, neuron, epithelial, stem, muscle
   Immune cells (4):       tcell, bcell, macrophage, neutrophil
   Blood cells (2):        erythrocyte, platelet
@@ -36,6 +36,11 @@ http://127.0.0.1:8877/
   Protists (2):           paramecium, amoeba
   Viruses (6):            virus (SARS-CoV-2), bacteriophage, hiv, influenza, adenovirus, ebola
   Standalone organelles:  mitochondrion, ribosome
+  Atoms (1):              hydrogen-atom
+  Stars (1):              sun
+  Planets (8):            mercury, venus, earth, mars, jupiter, saturn, uranus, neptune
+  Moons (1):              moon
+  Galaxies (2):           milky-way, andromeda
 ```
 
 6 virus cells each carry a 5-stage **lifecycle** (`cells.json` → `cells[].lifecycle`): Attachment, Entry, Replication, Assembly, Release.
@@ -57,6 +62,11 @@ Contoh:
 - `?cell=bacteriophage&mode=process` — auto-play T4 lifecycle
 - `?cell=hiv&mode=standalone&section=y:50` — sliced HIV virion
 - `?cell=influenza&mode=electron` — monochrome SEM Influenza
+- `?cell=hydrogen-atom&mode=standalone` — conceptual atom (proton + 1s cloud + electron)
+- `?cell=sun&mode=standalone` — the Sun (photosphere + corona + flares)
+- `?cell=saturn&mode=standalone&read=1` — Saturn with rings + annotated parts
+- `?cell=earth&mode=standalone&section=x:50` — sliced Earth + atmosphere + Moon
+- `?cell=milky-way&mode=standalone` — barred-spiral galaxy point cloud
 - `?theme=light&lang=id` — light theme + Bahasa Indonesia
 - `?panel=manual&lang=id` — open in-app user manual in Indonesian
 
@@ -88,7 +98,7 @@ tmux kill-session -t biocell-atlas
 
 ```bash
 curl -sS http://127.0.0.1:8877/api/health
-curl -sS http://127.0.0.1:8877/api/cells    # 16 cells + 5 lifecycles
+curl -sS http://127.0.0.1:8877/api/cells    # 39 specimens + 6 virus lifecycles
 curl -sS http://127.0.0.1:8877/api/services  # self probe + system metrics
 curl -sS http://127.0.0.1:8877/api/fleet     # combined
 ```
@@ -118,7 +128,7 @@ agent-fleet-dashboard/
     app.js                        orchestrator
     styles.css                    theme + panels
     bio/
-      geometry.js                 16 procedural cell builders
+      geometry.js                 30 procedural builders (cells → atoms → planets → galaxies)
       scene.js                    scene, lighting, bloom, modes, gizmo, section, process
       thumbnails.js               offscreen WebGL thumb renderer
       i18n.js                     en + id translations (~200 keys)
@@ -131,7 +141,7 @@ agent-fleet-dashboard/
     tcell.py virus_sarscov2.py mitochondrion.py ribosome.py
     epithelial.py stem.py muscle.py
     bacteriophage.py hiv.py influenza.py adenovirus.py erythrocyte.py
-  data/cells.json                 16 cells + categories + taxonomy + lifecycles
+  data/cells.json                 39 specimens + 14 categories + taxonomy + lifecycles
   docs/
     BIOCELL_ARCHITECTURE.md
     CRITIQUE_LOG.md               iteration notes (21+ passes)
@@ -143,7 +153,7 @@ agent-fleet-dashboard/
 | Scene | File |
 |---|---|
 | Landing — Plant Cell standalone | `docs/screenshots/01-landing.png` |
-| Atlas (all 16) | `docs/screenshots/02-atlas.png` |
+| Atlas (all 39) | `docs/screenshots/02-atlas.png` |
 | Gallery panel | `docs/screenshots/03-gallery.png` |
 | Animal Cell standalone | `docs/screenshots/04-animal-cell.png` |
 | Read View | `docs/screenshots/05-read-view.png` |
@@ -164,6 +174,7 @@ agent-fleet-dashboard/
 
 ## Changelog ringkas
 
+- **v0.8** — Renamed **Cell Architecture Studio → Scale Explorer**. Added the **Cosmos** scale: Sun, 8 planets, the Moon, Milky Way + Andromeda galaxies, plus a conceptual Hydrogen Atom (atomic scale). Total **39 specimens** in **14 categories** (added Atoms, Stars, Planets, Moons, Galaxies). New procedural builders `buildStar`, `buildPlanet`, `buildSpiralGalaxy` (real barred-spiral geometry, point-cloud star discs). Dedicated elevated Cosmos band in the Atlas; planet/galaxy/star live animations; `setOpacity` now fades `THREE.Points` so the galaxy disc dims with focus. CAD sources added for all cosmic bodies (galaxies export GLB point clouds).
 - **v0.7** — Added 10 new specimens (neutrophil, B-cell, macrophage, platelet, yeast, paramecium, amoeba, sperm, staph aureus, ebola). 3 new categories (Immune cells, Fungi, Protists). Renamed Specialised → Immune cells (4 cells). Added Reproductive cells category. Ebola also has 5-stage lifecycle. Total **26 specimens** in 9 categories. Camera now targets bbox center; status ring size capped for elongated cells.
 - **v0.6** — In-app User Manual (bilingual, 11 sections). Demo GIF + 15 curated screenshots. Privacy-first defaults: service probes + tmux session exposure now opt-in via env var. Published to GitHub.
 - **v0.5** — 4 functional top-bar panels (Gallery, Library, Recents, Settings). 3 themes. Bilingual en + id. localStorage persistence.

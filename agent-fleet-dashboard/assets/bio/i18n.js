@@ -1,4 +1,4 @@
-// Cell Architecture Studio — i18n / translations.
+// Scale Explorer — i18n / translations.
 // Two languages: English (en) and Indonesian (id). The `t()` helper falls
 // back to the key name if the translation is missing so that missing
 // translations are visible during development.
@@ -6,8 +6,8 @@
 export const TRANSLATIONS = {
   en: {
     // App / brand
-    "brand.title": "Cell Architecture Studio",
-    "brand.subtitle": "Local 3D Biology Explorer",
+    "brand.title": "Scale Explorer",
+    "brand.subtitle": "Atom → Galaxy · Local 3D",
 
     // Top bar
     "topbar.tab.gallery": "Gallery",
@@ -15,13 +15,13 @@ export const TRANSLATIONS = {
     "topbar.tab.recents": "Recents",
     "topbar.tab.settings": "Settings",
     "topbar.tab.manual": "Manual",
-    "topbar.search": "Search cells…",
+    "topbar.search": "Search specimens...",
 
     // Sidebar
-    "sidebar.eyebrow": "Cell library",
+    "sidebar.eyebrow": "Science library",
     "sidebar.newProject": "New project",
 
-    "search.placeholder": "Search by name, kingdom, or organelle…",
+    "search.placeholder": "Search by name, domain, or component...",
     "search.empty": "No specimens match.",
     "search.hintNav": "navigate",
     "search.hintOpen": "open",
@@ -41,8 +41,8 @@ export const TRANSLATIONS = {
     "project.savedAt": "Saved",
     "project.savePrompt": "Bookmark name (any label)",
 
-    "about.title": "About Cell Architecture Studio",
-    "about.tagline": "Local 3D explorer for 26 biological specimens.",
+    "about.title": "About Scale Explorer",
+    "about.tagline": "Local 3D explorer for 39 specimens across every scale — from a hydrogen atom to spiral galaxies.",
     "about.specimens": "Specimens",
     "about.rendering": "Rendering",
     "about.backend": "Backend",
@@ -65,7 +65,7 @@ export const TRANSLATIONS = {
     // View modes
     "viewModes.label": "View modes",
     "viewModes.standalone": "Standalone",
-    "viewModes.standalone.sub": "Single cell stage",
+    "viewModes.standalone.sub": "Single specimen stage",
     "viewModes.microscope": "Microscope",
     "viewModes.microscope.sub": "Vignette + scanlines",
     "viewModes.electron": "Electron Microscope",
@@ -73,16 +73,16 @@ export const TRANSLATIONS = {
     "viewModes.process": "Process",
     "viewModes.process.sub": "Virus replication timeline",
     "viewModes.atlas": "Atlas",
-    "viewModes.atlas.sub": "All cells together",
+    "viewModes.atlas.sub": "All specimens together",
 
     // Compare
-    "compare.label": "Compare cells",
-    "compare.left": "Left cell",
-    "compare.right": "Right cell",
+    "compare.label": "Compare specimens",
+    "compare.left": "Left specimen",
+    "compare.right": "Right specimen",
     "compare.action": "Open compare",
     "compare.close": "Close compare",
-    "compare.pick": "Pick cell",
-    "compare.subtitle": "Side-by-side compare. Click left/right cards below to swap cells.",
+    "compare.pick": "Pick specimen",
+    "compare.subtitle": "Side-by-side compare. Click left/right cards below to swap specimens.",
 
     // Detail panel
     "detail.organelleDetails": "Organelle details",
@@ -118,10 +118,10 @@ export const TRANSLATIONS = {
     // Tabs / panels
     "panel.gallery.title": "Gallery",
     "panel.gallery.subtitle": "All {0} specimens at a glance.",
-    "panel.gallery.openCell": "Open cell",
+    "panel.gallery.openCell": "Open specimen",
     "panel.library.title": "Library",
     "panel.library.subtitle": "Browse by category, search by name or property.",
-    "panel.library.searchPlaceholder": "Search by label, kingdom, or component…",
+    "panel.library.searchPlaceholder": "Search by label, domain, or component...",
     "panel.library.noResults": "No specimens match the current filter.",
     "panel.recents.title": "Recents",
     "panel.recents.subtitle": "Your recently viewed specimens.",
@@ -131,7 +131,7 @@ export const TRANSLATIONS = {
     "panel.settings.title": "Settings",
     "panel.settings.subtitle": "Preferences are saved to your browser only.",
     "panel.manual.title": "User Manual",
-    "panel.manual.subtitle": "Everything you need to explore the 26 specimens.",
+    "panel.manual.subtitle": "Everything you need to explore the 39 specimens.",
     "panel.settings.theme": "Theme",
     "panel.settings.theme.dark": "Dark",
     "panel.settings.theme.light": "Light",
@@ -159,20 +159,20 @@ export const TRANSLATIONS = {
     "export.step.sub": "Copy-paste python instructions for cad_source/*.py",
   },
   id: {
-    "brand.title": "Cell Architecture Studio",
-    "brand.subtitle": "Eksplorer Biologi 3D Lokal",
+    "brand.title": "Scale Explorer",
+    "brand.subtitle": "Atom → Galaksi · 3D Lokal",
 
     "topbar.tab.gallery": "Galeri",
     "topbar.tab.library": "Pustaka",
     "topbar.tab.recents": "Terbaru",
     "topbar.tab.settings": "Pengaturan",
     "topbar.tab.manual": "Panduan",
-    "topbar.search": "Cari sel…",
+    "topbar.search": "Cari spesimen...",
 
-    "sidebar.eyebrow": "Pustaka sel",
+    "sidebar.eyebrow": "Pustaka sains",
     "sidebar.newProject": "Sesi baru",
 
-    "search.placeholder": "Cari berdasarkan nama, kingdom, atau organel…",
+    "search.placeholder": "Cari berdasarkan nama, domain, atau komponen...",
     "search.empty": "Tidak ada spesimen yang cocok.",
     "search.hintNav": "navigasi",
     "search.hintOpen": "buka",
@@ -192,8 +192,8 @@ export const TRANSLATIONS = {
     "project.savedAt": "Disimpan",
     "project.savePrompt": "Nama bookmark (label bebas)",
 
-    "about.title": "Tentang Cell Architecture Studio",
-    "about.tagline": "Eksplorer 3D lokal untuk 26 spesimen biologi.",
+    "about.title": "Tentang Scale Explorer",
+    "about.tagline": "Eksplorer 3D lokal untuk 39 spesimen di segala skala — dari atom hidrogen hingga galaksi spiral.",
     "about.specimens": "Spesimen",
     "about.rendering": "Render",
     "about.backend": "Backend",
@@ -214,7 +214,7 @@ export const TRANSLATIONS = {
 
     "viewModes.label": "Mode tampilan",
     "viewModes.standalone": "Tunggal",
-    "viewModes.standalone.sub": "Satu sel utama",
+    "viewModes.standalone.sub": "Satu spesimen utama",
     "viewModes.microscope": "Mikroskop",
     "viewModes.microscope.sub": "Vignette + scanline",
     "viewModes.electron": "Mikroskop Elektron",
@@ -222,15 +222,15 @@ export const TRANSLATIONS = {
     "viewModes.process": "Proses",
     "viewModes.process.sub": "Timeline replikasi virus",
     "viewModes.atlas": "Atlas",
-    "viewModes.atlas.sub": "Semua sel bersamaan",
+    "viewModes.atlas.sub": "Semua spesimen bersamaan",
 
-    "compare.label": "Bandingkan sel",
-    "compare.left": "Sel kiri",
-    "compare.right": "Sel kanan",
+    "compare.label": "Bandingkan spesimen",
+    "compare.left": "Spesimen kiri",
+    "compare.right": "Spesimen kanan",
     "compare.action": "Buka pembanding",
     "compare.close": "Tutup pembanding",
-    "compare.pick": "Pilih sel",
-    "compare.subtitle": "Tampilan berdampingan. Klik kartu kiri/kanan di bawah untuk mengganti sel.",
+    "compare.pick": "Pilih spesimen",
+    "compare.subtitle": "Tampilan berdampingan. Klik kartu kiri/kanan di bawah untuk mengganti spesimen.",
 
     "detail.organelleDetails": "Detail organel",
     "detail.whereItOccurs": "Lokasi keberadaan",
@@ -261,10 +261,10 @@ export const TRANSLATIONS = {
 
     "panel.gallery.title": "Galeri",
     "panel.gallery.subtitle": "Semua {0} spesimen sekilas.",
-    "panel.gallery.openCell": "Buka sel",
+    "panel.gallery.openCell": "Buka spesimen",
     "panel.library.title": "Pustaka",
     "panel.library.subtitle": "Telusuri per kategori, cari berdasarkan nama atau properti.",
-    "panel.library.searchPlaceholder": "Cari berdasarkan label, kingdom, atau komponen…",
+    "panel.library.searchPlaceholder": "Cari berdasarkan label, domain, atau komponen...",
     "panel.library.noResults": "Tidak ada spesimen yang cocok dengan filter saat ini.",
     "panel.recents.title": "Terbaru",
     "panel.recents.subtitle": "Spesimen yang baru saja Anda lihat.",
@@ -274,7 +274,7 @@ export const TRANSLATIONS = {
     "panel.settings.title": "Pengaturan",
     "panel.settings.subtitle": "Preferensi disimpan hanya di browser Anda.",
     "panel.manual.title": "Panduan Pengguna",
-    "panel.manual.subtitle": "Semua yang perlu Anda ketahui untuk menjelajahi 26 spesimen.",
+    "panel.manual.subtitle": "Semua yang perlu Anda ketahui untuk menjelajahi 39 spesimen.",
     "panel.settings.theme": "Tema",
     "panel.settings.theme.dark": "Gelap",
     "panel.settings.theme.light": "Terang",

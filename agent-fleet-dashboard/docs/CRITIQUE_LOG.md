@@ -393,3 +393,86 @@ Atlas rendering shows rich biodiversity: 26 cells visible simultaneously in a pa
 - Add centriole + lysosome + Golgi + nucleus as standalone organelles.
 - Add prion as another acellular entity (beyond viruses).
 - Localised cell-specific strings (summary, facts) in Bahasa Indonesia via `label_id`/`summary_id` keys in `cells.json`.
+
+---
+
+# Pass 28+ (v0.8 — Scale Explorer: Cosmos scale)
+
+## Pass 28 · Design + scope
+
+Goal: extend the atlas beyond biology in both directions and rename the
+project to reflect its true range. The WIP already added a Hydrogen Atom +
+"Matter" branch, confirming the atom→… pivot. This pass adds the **Cosmos**
+scale (Solar System + galaxies) and finalises the rename.
+
+Decision: rename brand **Cell Architecture Studio → Scale Explorer**
+("Atom → Galaxy"). Keep the internal `cells` / `cellId` data keys and
+`buildCell()` dispatcher unchanged so deep-links, localStorage, and the API
+stay backward-compatible (non-breaking rename — user-visible strings only).
+
+12 new specimens:
+- Sun (G2V star: photosphere granules, core, corona, plasma flares)
+- Mercury, Venus, Earth (+ atmosphere + orbiting Moon), Mars
+- Jupiter (cloud bands + Great Red Spot), Saturn (ring system + bands)
+- Uranus, Neptune (atmospheres)
+- The Moon (standalone satellite)
+- Milky Way (barred spiral, ~2,600-star point cloud), Andromeda / M31
+
+5 new categories: Atoms, Stars, Planets, Moons, Galaxies (14 total).
+
+## Pass 29 · Implementation
+
+Delivered:
+- 3 new procedural builders in `geometry.js`: `buildStar`, `buildPlanet`
+  (parameterised: bands / spot / atmosphere / rings / moon), `buildSpiralGalaxy`
+  (logarithmic-arm `THREE.Points` disc + bulge + halo).
+- 12 `cells.json` entries with real educational stats (diameters, temps,
+  moon counts, distances, ages) + taxonomy Cosmos branch + scale-bridge links.
+- Cosmos animation block in `scene.js` live loop, keyed on
+  `entry.cell.kingdom === "Cosmos"` + `entry.cell.type`.
+- Brand + count updates across `index.html`, `i18n.js` (125/125 keys),
+  `manual.js`, `app.js`, `cells.json` atlasTitle.
+- build123d CAD sources for all cosmic bodies (galaxies → GLB point clouds).
+
+## Pass 30 · Critique (reviewer subagent) + fixes
+
+Reviewer findings, all fixed and re-verified:
+1. **`bar` param was a no-op** in `buildSpiralGalaxy` (`… ? 0 : 0`). Now inner
+   stars (rad < 0.34·R) form a real straight central bar — verified the barred
+   galaxy's inner |z| spread is ~6× tighter than the unbarred one.
+2. **`setOpacity` skipped `THREE.Points`** (guarded on `isMesh`), so the galaxy
+   disc never dimmed on focus / Read View. Now applies to any object with a
+   material.
+3. **Brand leftovers**: `cells.json` atlasTitle, hardcoded "26 across 9
+   categories" in the About dialog, EN manual intro ("26 biological
+   specimens" + "9 categories"), and the load-error banner all still said
+   "Cell Architecture Studio". Fixed.
+4. **Dead `userData.glow`** metadata removed.
+5. **Andromeda** "most distant naked-eye object" claim softened (contested).
+6. **Atlas crowding**: cosmos bodies collided with microscopic biology
+   (staph↔Mercury, erythrocyte/yeast↔Saturn). Moved all Cosmos specimens to a
+   dedicated elevated band (+y, −z); 0 cosmos↔biology pairs <0.8u remain.
+7. Search dropdown cap raised 30 → 50 so all 39 specimens are reachable.
+
+## Pass 31 · Verification
+
+- `node --check` on all 8 JS modules — OK.
+- Headless builder harness: all 12 cosmos builders + atom return valid Groups
+  with complete componentMaps (28 OK; the 11 "failures" are pre-existing
+  complex biology builders the minimal Three stub can't model, unchanged).
+- Data integrity script: 39 cells / 14 categories, every category + taxonomy +
+  link ref resolves, every cell has a registered builder + valid category — OK.
+- i18n parity en↔id: 125/125 keys, no gaps.
+- `python3 -m py_compile` on `server.py` + all 12 new CAD sources — OK.
+- Live server `/api/cells` returns 39 specimens, atlasTitle "Scale Explorer",
+  Saturn components [surface, bands, rings], Milky Way `bar:true`.
+
+## Yang masih bisa di-improve (next setelah v0.8)
+
+- Fresh Cosmos screenshots + demo GIF (atlas band, Sun, Saturn rings, galaxies).
+- More Solar System bodies: dwarf planets (Pluto, Ceres), more moons (Titan,
+  Europa, Io), asteroid belt, comets.
+- More galaxy types (elliptical, irregular) + nebulae + star-cluster scale.
+- Molecules + materials to fill the empty "Matter" taxonomy slots.
+- A "scale ladder" view that flies between atom → cell → planet → galaxy.
+- Localised cosmos summaries/facts in Bahasa Indonesia (data-level `*_id`).

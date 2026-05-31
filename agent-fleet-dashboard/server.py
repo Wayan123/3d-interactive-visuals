@@ -43,7 +43,7 @@ from urllib.error import URLError
 PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_ROOT / "data"
 SERVICE_NAME = "biocell-atlas"
-SERVICE_VERSION = "0.2.0"
+SERVICE_VERSION = "0.8.0"
 START_TIME = time.time()
 
 logger = logging.getLogger(SERVICE_NAME)

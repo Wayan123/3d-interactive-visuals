@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest a specimen, learning mode, deployment feature, or UX improvement.
+title: "Feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Learning goal
+      description: What should learners understand better after this feature?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposed feature
+      description: Describe the specimen, interaction, or improvement.
+    validations:
+      required: true
+  - type: dropdown
+    id: scale
+    attributes:
+      label: Science scale
+      options:
+        - Cell / tissue
+        - Virus / organelle
+        - Molecule
+        - Atom
+        - Material / crystal
+        - Macro science object
+        - Documentation / deployment
+  - type: textarea
+    id: references
+    attributes:
+      label: Public references
+      description: Add links to public educational references if available.

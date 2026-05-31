@@ -1,4 +1,4 @@
-// Cell Architecture Studio — frontend orchestrator.
+// Scale Explorer — frontend orchestrator.
 // Wires DOM, scene, thumbnails, taxonomy, services polling, exports, and modes.
 
 import { BioScene } from "./bio/scene.js";
@@ -1296,8 +1296,8 @@ function renderSearchResults() {
   if (q) {
     cells = cells.filter((c) => matchesSearch(c, q));
   }
-  // limit to ~30 to avoid huge dropdowns
-  cells = cells.slice(0, 30);
+  // limit to ~50 to avoid huge dropdowns (still covers all 39 specimens)
+  cells = cells.slice(0, 50);
   if (!cells.length) {
     dom.searchResults.innerHTML = `<p class="search-empty">${escapeHtml(t("search.empty", state.lang))}</p>`;
     return;
@@ -1642,6 +1642,6 @@ main().catch((error) => {
   console.error(error);
   const banner = document.createElement("div");
   banner.style.cssText = "position:fixed;left:14px;right:14px;bottom:14px;background:#260d14;border:1px solid #ff5f7a;color:#ffd6df;padding:12px;border-radius:10px;z-index:60";
-  banner.textContent = `Gagal memuat Cell Architecture Studio: ${error.message}`;
+  banner.textContent = `Gagal memuat Scale Explorer: ${error.message}`;
   document.body.appendChild(banner);
 });

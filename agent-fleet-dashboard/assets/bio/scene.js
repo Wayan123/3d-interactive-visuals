@@ -1,4 +1,4 @@
-// Cell Architecture Studio — scene orchestrator.
+// Scale Explorer — scene orchestrator.
 // Owns Three.js scene, camera, lighting, cell groups, modes (standalone /
 // atlas / microscope / electron / compare), bloom post-FX, read-view label
 // projection, axis gizmo painter, and animation loop. Procedural rendering
@@ -912,6 +912,32 @@ export class BioScene {
           const map = entry.group.userData.componentMap;
           if (map?.flagella) map.flagella.rotation.x = Math.sin(t * 4) * 0.4;
         }
+        if (id === "hydrogen-atom" && this.liveMode) {
+          const map = entry.group.userData.componentMap;
+          if (map?.electron) {
+            map.electron.rotation.y = t * 2.1;
+            map.electron.rotation.z = Math.sin(t * 0.7) * 0.45;
+          }
+          if (map?.orbitals) map.orbitals.rotation.y = t * 0.25;
+        }
+        if (this.liveMode && entry.cell.kingdom === "Cosmos") {
+          const map = entry.group.userData.componentMap;
+          const type = entry.cell.type;
+          if (type === "star") {
+            if (map?.photosphere) map.photosphere.rotation.y = t * 0.18;
+            if (map?.corona) map.corona.scale.setScalar(1 + Math.sin(t * 1.3) * 0.02);
+            if (map?.flares) map.flares.rotation.y = t * 0.12;
+          } else if (type === "galaxy") {
+            if (map?.arms) map.arms.rotation.y = t * 0.06;
+            if (map?.core) map.core.rotation.y = t * 0.04;
+          } else {
+            // planet / moon: spin surface group; orbit any satellite
+            if (map?.surface) map.surface.rotation.y = t * 0.3;
+            if (map?.bands) map.bands.rotation.y = t * 0.3;
+            if (map?.atmosphere) map.atmosphere.rotation.y = t * 0.22;
+            if (map?.moon) map.moon.rotation.y = t * 0.5;
+          }
+        }
         if (this.liveMode && this.mode === "atlas") {
           const o = entry.origin;
           entry.group.position.y = o.y + Math.sin(t * 0.9 + o.x * 2.1) * 0.04;
@@ -961,7 +987,7 @@ function setOpacity(obj, opacity) {
     mat.needsUpdate = true;
   };
   const visit = (o) => {
-    if ((o.isMesh || o.isInstancedMesh) && o.material) applyMat(o.material);
+    if (o.material) applyMat(o.material);
     o.children?.forEach(visit);
   };
   visit(obj);

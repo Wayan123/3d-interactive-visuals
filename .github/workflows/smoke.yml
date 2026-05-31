@@ -1,0 +1,38 @@
+name: Smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate project data and sources
+        run: python3 scripts/validate_project.py
+      - name: Compile Python backend
+        run: python3 -m py_compile agent-fleet-dashboard/server.py
+      - name: Start local server
+        run: |
+          cd agent-fleet-dashboard
+          PORT=8899 ./run.sh > /tmp/biocell-server.log 2>&1 &
+          echo $! > /tmp/biocell-server.pid
+      - name: Smoke test local API
+        run: python3 scripts/smoke_server.py --base-url http://127.0.0.1:8899 --wait 10
+      - name: Show server logs on failure
+        if: failure()
+        run: cat /tmp/biocell-server.log || true
+      - name: Stop local server
+        if: always()
+        run: |
+          if [ -f /tmp/biocell-server.pid ]; then
+            kill "$(cat /tmp/biocell-server.pid)" || true
+          fi

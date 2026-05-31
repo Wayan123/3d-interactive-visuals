@@ -2470,9 +2470,367 @@ export function buildEbola(THREE, params, M) {
   return group;
 }
 
+// --- Builder: Hydrogen atom ----------------------------------------------
+
+export function buildHydrogenAtom(THREE, params, M) {
+  const p = { nucleusRadius: 0.18, orbitRadius: 0.95, cloudRadius: 1.08, electronRadius: 0.06, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "hydrogen-atom";
+
+  const protonMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color("#ff6f61"),
+    roughness: 0.32,
+    metalness: 0.12,
+    emissive: new THREE.Color("#7a1d18"),
+    emissiveIntensity: 0.45,
+  });
+  const electronMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color("#6eefff"),
+    roughness: 0.22,
+    metalness: 0.2,
+    emissive: new THREE.Color("#00c2ff"),
+    emissiveIntensity: 0.9,
+  });
+  const orbitMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color("#7dfce0"),
+    transparent: true,
+    opacity: 0.42,
+    side: THREE.DoubleSide,
+  });
+  const cloudMat = new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color("#6eefff"),
+    transparent: true,
+    opacity: 0.13,
+    roughness: 0.1,
+    transmission: 0.35,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+
+  const nucleus = new THREE.Mesh(new THREE.IcosahedronGeometry(p.nucleusRadius, 3), protonMat);
+  nucleus.userData.componentId = "nucleus";
+  group.add(nucleus);
+
+  const cloud = new THREE.Mesh(new THREE.SphereGeometry(p.cloudRadius, 48, 32), cloudMat);
+  cloud.userData.componentId = "cloud";
+  group.add(cloud);
+
+  const orbitGroup = new THREE.Group();
+  orbitGroup.userData.componentId = "orbitals";
+  const orbitGeo = new THREE.TorusGeometry(p.orbitRadius, 0.006, 8, 160);
+  [[0, 0, 0], [Math.PI / 2, 0, 0], [0, Math.PI / 2, Math.PI / 5]].forEach((rot) => {
+    const orbit = new THREE.Mesh(orbitGeo, orbitMat);
+    orbit.rotation.set(rot[0], rot[1], rot[2]);
+    orbit.userData.componentId = "orbitals";
+    orbitGroup.add(orbit);
+  });
+  group.add(orbitGroup);
+
+  const electronGroup = new THREE.Group();
+  electronGroup.userData.componentId = "electron";
+  const electron = new THREE.Mesh(new THREE.SphereGeometry(p.electronRadius, 24, 16), electronMat);
+  electron.position.set(p.orbitRadius, 0, 0);
+  electron.userData.componentId = "electron";
+  electronGroup.add(electron);
+  const trail = new THREE.Mesh(new THREE.TorusGeometry(p.orbitRadius, 0.012, 8, 80, Math.PI * 0.55), orbitMat);
+  trail.rotation.z = -0.28;
+  trail.userData.componentId = "electron";
+  electronGroup.add(trail);
+  group.add(electronGroup);
+
+  group.userData.componentMap = { nucleus, cloud, orbitals: orbitGroup, electron: electronGroup };
+  return group;
+}
+
+// --- Builder: Star (Sun) -------------------------------------------------
+
+export function buildStar(THREE, params, M) {
+  const p = { radius: 1.25, color: "#ffd24a", coreColor: "#fff3c4", coronaColor: "#ff8a2a", flares: 7, ...params };
+  const group = new THREE.Group();
+  group.userData.cellId = "sun";
+
+  const photosphere = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(p.radius, 4),
+    new THREE.MeshStandardMaterial({
+      color: new THREE.Color(p.color),
+      emissive: new THREE.Color(p.color),
+      emissiveIntensity: 1.35,
+      roughness: 0.6,
+      metalness: 0.0,
+    }),
+  );
+  displaceGeometry(THREE, photosphere.geometry, p.radius * 0.02, 3.0, 7);
+  photosphere.userData.componentId = "photosphere";
+  group.add(photosphere);
+
+  const core = new THREE.Mesh(
+    new THREE.SphereGeometry(p.radius * 0.55, 32, 24),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(p.coreColor) }),
+  );
+  core.userData.componentId = "core";
+  group.add(core);
+
+  const corona = new THREE.Mesh(
+    new THREE.SphereGeometry(p.radius * 1.32, 40, 28),
+    new THREE.MeshBasicMaterial({
+      color: new THREE.Color(p.coronaColor),
+      transparent: true,
+      opacity: 0.16,
+      side: THREE.BackSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    }),
+  );
+  corona.userData.componentId = "corona";
+  group.add(corona);
+
+  const flareGroup = new THREE.Group();
+  flareGroup.userData.componentId = "flares";
+  const rnd = mulberry32(91);
+  for (let i = 0; i < p.flares; i++) {
+    const a = (i / p.flares) * Math.PI * 2 + rnd() * 0.4;
+    const tilt = (rnd() - 0.5) * Math.PI;
+    const arc = new THREE.Mesh(
+      new THREE.TorusGeometry(p.radius * (0.55 + rnd() * 0.25), 0.025, 6, 40, Math.PI * (0.35 + rnd() * 0.4)),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(p.coronaColor), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }),
+    );
+    arc.position.set(Math.cos(a) * p.radius, Math.sin(a) * p.radius * 0.4, Math.sin(a) * p.radius);
+    arc.rotation.set(tilt, a, rnd() * Math.PI);
+    arc.userData.componentId = "flares";
+    flareGroup.add(arc);
+  }
+  group.add(flareGroup);
+
+  group.userData.componentMap = { core, photosphere, corona, flares: flareGroup };
+  return group;
+}
+
+// --- Builder: Planet / Moon (parameterised) ------------------------------
+
+export function buildPlanet(THREE, params, M) {
+  const p = {
+    radius: 1.0,
+    color: "#9bb7d4",
+    accentColor: "#d8e6f2",
+    bands: false,
+    bandColor: "#c98b5a",
+    atmosphere: false,
+    atmosphereColor: "#7fd0ff",
+    rings: false,
+    ringColor: "#d8c9a0",
+    roughness: 0.85,
+    moon: null,
+    spotColor: null,
+    ...params,
+  };
+  const group = new THREE.Group();
+  group.userData.cellId = p.cellId || "planet";
+
+  const surfMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(p.color),
+    roughness: p.roughness,
+    metalness: 0.05,
+    emissive: new THREE.Color(p.color),
+    emissiveIntensity: 0.05,
+  });
+  const surface = new THREE.Mesh(new THREE.IcosahedronGeometry(p.radius, 5), surfMat);
+  displaceGeometry(THREE, surface.geometry, p.radius * 0.012, 2.4, p.seed || 3);
+  surface.userData.componentId = "surface";
+  group.add(surface);
+  group.userData.componentMap = { surface };
+
+  if (p.bands) {
+    const bandGroup = new THREE.Group();
+    bandGroup.userData.componentId = "bands";
+    const rnd = mulberry32(p.seed || 11);
+    const count = 7;
+    for (let i = 0; i < count; i++) {
+      const lat = (i / (count - 1) - 0.5) * Math.PI * 0.92;
+      const r = Math.cos(lat) * p.radius * 1.004;
+      const band = new THREE.Mesh(
+        new THREE.TorusGeometry(r, p.radius * (0.025 + rnd() * 0.03), 8, 64),
+        new THREE.MeshStandardMaterial({
+          color: new THREE.Color(i % 2 ? p.bandColor : p.accentColor),
+          roughness: 0.9,
+          transparent: true,
+          opacity: 0.7,
+        }),
+      );
+      band.rotation.x = Math.PI / 2;
+      band.position.y = Math.sin(lat) * p.radius;
+      band.userData.componentId = "bands";
+      bandGroup.add(band);
+    }
+    group.add(bandGroup);
+    group.userData.componentMap.bands = bandGroup;
+  }
+
+  if (p.spotColor) {
+    const spot = new THREE.Mesh(
+      new THREE.SphereGeometry(p.radius * 0.22, 24, 16),
+      new THREE.MeshStandardMaterial({ color: new THREE.Color(p.spotColor), roughness: 0.8 }),
+    );
+    spot.scale.set(1.6, 0.7, 0.4);
+    spot.position.set(p.radius * 0.78, -p.radius * 0.18, p.radius * 0.42);
+    spot.userData.componentId = "spot";
+    group.add(spot);
+    group.userData.componentMap.spot = spot;
+  }
+
+  if (p.atmosphere) {
+    const atmo = new THREE.Mesh(
+      new THREE.SphereGeometry(p.radius * 1.06, 40, 28),
+      new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color(p.atmosphereColor),
+        transparent: true,
+        opacity: 0.18,
+        roughness: 0.2,
+        transmission: 0.5,
+        side: THREE.BackSide,
+        depthWrite: false,
+      }),
+    );
+    atmo.userData.componentId = "atmosphere";
+    group.add(atmo);
+    group.userData.componentMap.atmosphere = atmo;
+  }
+
+  if (p.rings) {
+    const ringGroup = new THREE.Group();
+    ringGroup.userData.componentId = "rings";
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(p.ringColor),
+      roughness: 0.85,
+      transparent: true,
+      opacity: 0.6,
+      side: THREE.DoubleSide,
+    });
+    [1.5, 1.75, 2.0, 2.25].forEach((rr, i) => {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(p.radius * rr, p.radius * 0.06, 2, 96), ringMat);
+      ring.rotation.x = Math.PI / 2 - 0.18;
+      ring.scale.z = 0.02;
+      ring.userData.componentId = "rings";
+      ringGroup.add(ring);
+    });
+    group.add(ringGroup);
+    group.userData.componentMap.rings = ringGroup;
+  }
+
+  if (p.moon) {
+    const moonGroup = new THREE.Group();
+    moonGroup.userData.componentId = "moon";
+    const moon = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(p.radius * (p.moon.radius || 0.27), 3),
+      new THREE.MeshStandardMaterial({ color: new THREE.Color(p.moon.color || "#cfcfcf"), roughness: 0.95 }),
+    );
+    displaceGeometry(THREE, moon.geometry, p.radius * 0.01, 3.2, 21);
+    moon.position.set(p.radius * (p.moon.dist || 2.0), p.radius * 0.2, 0);
+    moon.userData.componentId = "moon";
+    moonGroup.add(moon);
+    group.add(moonGroup);
+    group.userData.componentMap.moon = moonGroup;
+  }
+
+  return group;
+}
+
+// --- Builder: Spiral galaxy ----------------------------------------------
+
+export function buildSpiralGalaxy(THREE, params, M) {
+  const p = {
+    radius: 2.4,
+    arms: 4,
+    starCount: 2600,
+    coreColor: "#fff2c2",
+    armColor: "#9fc6ff",
+    dustColor: "#ff9a6b",
+    bar: false,
+    ...params,
+  };
+  const group = new THREE.Group();
+  group.userData.cellId = p.cellId || "galaxy";
+  const rnd = mulberry32(p.seed || 43);
+
+  // Core bulge
+  const core = new THREE.Mesh(
+    new THREE.SphereGeometry(p.radius * 0.22, 32, 24),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(p.coreColor), transparent: true, opacity: 0.92 }),
+  );
+  core.scale.y = 0.55;
+  core.userData.componentId = "core";
+  group.add(core);
+  const coreGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(p.radius * 0.42, 32, 24),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(p.coreColor), transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false }),
+  );
+  coreGlow.scale.y = 0.5;
+  coreGlow.userData.componentId = "core";
+  group.add(coreGlow);
+
+  // Star disc following logarithmic spiral arms
+  const positions = new Float32Array(p.starCount * 3);
+  const colors = new Float32Array(p.starCount * 3);
+  const cArm = new THREE.Color(p.armColor);
+  const cCore = new THREE.Color(p.coreColor);
+  const cDust = new THREE.Color(p.dustColor);
+  for (let i = 0; i < p.starCount; i++) {
+    const t = Math.pow(rnd(), 0.6);
+    const rad = t * p.radius;
+    const arm = Math.floor(rnd() * p.arms);
+    const armAngle = (arm / p.arms) * Math.PI * 2;
+    const spread = (rnd() - 0.5) * (0.5 - t * 0.32);
+    let px, pz;
+    const barLen = p.radius * 0.34;
+    if (p.bar && rad < barLen) {
+      // Inner stars form a straight central bar (along x) rather than a spiral.
+      const along = (rnd() - 0.5) * 2 * barLen;
+      const across = (rnd() - 0.5) * barLen * 0.22;
+      px = along;
+      pz = across;
+    } else {
+      const swirl = rad * 2.4;
+      const ang = armAngle + swirl + spread;
+      px = Math.cos(ang) * rad;
+      pz = Math.sin(ang) * rad;
+    }
+    const y = (rnd() - 0.5) * p.radius * 0.06 * (1.0 - t * 0.6);
+    positions[i * 3] = px;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = pz;
+    const mix = t < 0.18 ? cCore : (Math.abs(spread) > 0.28 ? cDust : cArm);
+    colors[i * 3] = mix.r ?? 0.7;
+    colors[i * 3 + 1] = mix.g ?? 0.8;
+    colors[i * 3 + 2] = mix.b ?? 1.0;
+  }
+  const discGeo = new THREE.BufferGeometry();
+  discGeo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  discGeo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+  const disc = new THREE.Points(
+    discGeo,
+    new THREE.PointsMaterial({ size: 0.035, vertexColors: true, transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending }),
+  );
+  disc.userData.componentId = "arms";
+  group.add(disc);
+
+  // Faint halo shell
+  const halo = new THREE.Mesh(
+    new THREE.SphereGeometry(p.radius * 1.15, 24, 18),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(p.armColor), transparent: true, opacity: 0.05, side: THREE.BackSide, depthWrite: false }),
+  );
+  halo.userData.componentId = "halo";
+  group.add(halo);
+
+  group.userData.componentMap = { core, arms: disc, halo, disc };
+  return group;
+}
+
 // --- Registry -------------------------------------------------------------
 
 export const BUILDERS = {
+  buildStar,
+  buildPlanet,
+  buildSpiralGalaxy,
+  buildHydrogenAtom,
   buildEcoli,
   buildAnimalCell,
   buildPlantCell,

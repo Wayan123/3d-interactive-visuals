@@ -1,4 +1,4 @@
-// Cell Architecture Studio — user manual content with rich illustrations.
+// Scale Explorer — user manual content with rich illustrations.
 // Bilingual (English + Indonesian). Each section has HTML body that mixes
 // prose, code samples, definition lists, and embedded <figure> blocks
 // pointing to screenshots in docs/screenshots/. The Manual panel renders
@@ -31,7 +31,8 @@ function manualEn() {
       id: "getting-started",
       title: "Getting Started",
       body: `
-        <p>Cell Architecture Studio is a local 3D explorer for <strong>26 biological specimens</strong>: tissue cells, immune cells, blood cells, reproductive cells, bacteria, fungi, protists, viruses, and standalone organelles. Everything is rendered procedurally in your browser — no external models, no cloud.</p>
+        <p>Scale Explorer is a local 3D explorer for <strong>39 specimens across every scale</strong> — from a single hydrogen atom, through cells, viruses, and organelles, all the way out to the Sun, the eight planets, the Moon, and spiral galaxies. Everything is rendered procedurally in your browser — no external models, no cloud.</p>
+        <p><strong>Cosmos scale:</strong> the latest additions add <em>Stars</em>, <em>Planets</em>, <em>Moons</em>, and <em>Galaxies</em> categories. The Solar System and galaxy sets are designed to keep expanding (more moons, dwarf planets, nebulae, and galaxy types over time).</p>
         ${fig("01-landing.png", "Landing view: Plant Cell selected, sidebar grouped by category, axis gizmo top-right, viewport controls along the bottom.", "", "en")}
         <h3>Open the app</h3>
         <ol>
@@ -55,7 +56,7 @@ function manualEn() {
         <h3>Top bar</h3>
         <p>Five tabs — <strong>Gallery</strong>, <strong>Library</strong>, <strong>Recents</strong>, <strong>Manual</strong>, <strong>Settings</strong> — plus a live/static API badge, search, and avatar.</p>
         <h3>Left sidebar</h3>
-        <p>Scrollable cell library grouped into 9 categories: <em>Tissue cells</em>, <em>Immune cells</em>, <em>Blood cells</em>, <em>Reproductive cells</em>, <em>Bacteria</em>, <em>Fungi</em>, <em>Protists</em>, <em>Viruses</em>, <em>Standalone organelles</em>. Each item shows a live 3D thumbnail.</p>
+        <p>Scrollable specimen library grouped into 14 categories spanning every scale: <em>Tissue cells</em>, <em>Immune cells</em>, <em>Blood cells</em>, <em>Reproductive cells</em>, <em>Bacteria</em>, <em>Fungi</em>, <em>Protists</em>, <em>Viruses</em>, <em>Standalone organelles</em>, <em>Atoms</em>, <em>Stars</em>, <em>Planets</em>, <em>Moons</em>, and <em>Galaxies</em>. Each item shows a live 3D thumbnail.</p>
         <h3>Main viewport</h3>
         <p>Procedural 3D render of the selected specimen. <strong>Drag</strong> to rotate, <strong>scroll</strong> to zoom, <strong>right-drag</strong> to pan. The top-right XYZ gizmo shows current orientation.</p>
         <h3>Right panel</h3>
@@ -71,7 +72,7 @@ function manualEn() {
           { src: "manual-fig-microscope.png", en: "Microscope — vignette + scanlines.", id: "" },
           { src: "10-electron-microscope.png", en: "Electron Microscope — monochrome SEM.", id: "" },
           { src: "08-process-mode.png", en: "Process — virus replication timeline.", id: "" },
-          { src: "02-atlas.png", en: "Atlas — all 26 specimens together.", id: "" },
+          { src: "02-atlas.png", en: "Atlas — all 39 specimens together.", id: "" },
         ], "en")}
         <dl>
           <dt>Standalone</dt>
@@ -83,7 +84,7 @@ function manualEn() {
           <dt>Process</dt>
           <dd>Virus lifecycle timeline (only for the 6 viruses). Auto-plays 5 stages with per-stage narration.</dd>
           <dt>Atlas</dt>
-          <dd>All 26 specimens orbit on a shared ring with link lines.</dd>
+          <dd>All 39 specimens orbit on a shared ring with link lines.</dd>
         </dl>
         <p>Tip: <code>?mode=electron</code> deep-link opens directly in that mode.</p>`,
     },
@@ -116,7 +117,7 @@ function manualEn() {
       body: `
         <p>Each top-bar tab opens a full-screen overlay panel. Click the active tab again or press <kbd>Esc</kbd> to close.</p>
         ${figRow([
-          { src: "03-gallery.png", en: "Gallery — all 26 specimens as cards.", id: "" },
+          { src: "03-gallery.png", en: "Gallery — all 39 specimens as cards.", id: "" },
           { src: "manual-fig-library.png", en: "Library — categorised list with search.", id: "" },
           { src: "manual-fig-recents.png", en: "Recents — last 12 viewed specimens.", id: "" },
         ], "en")}
@@ -125,7 +126,7 @@ function manualEn() {
           { src: "15-settings-panel.png", en: "Settings — theme, language, autoplay.", id: "" },
         ], "en")}
         <h3>Gallery</h3>
-        <p>Grid view of all 26 specimens with rendered thumbnails + category badges. Click any card to open that cell.</p>
+        <p>Grid view of all 39 specimens with rendered thumbnails + category badges. Click any card to open that cell.</p>
         <h3>Library</h3>
         <p>Categorised list with a live search box. Search matches label, kingdom, summary, and organelle names.</p>
         <h3>Recents</h3>
@@ -251,7 +252,8 @@ function manualId() {
       id: "getting-started",
       title: "Memulai",
       body: `
-        <p>Cell Architecture Studio adalah eksplorer 3D lokal untuk <strong>26 spesimen biologi</strong>: sel jaringan, sel imun, sel darah, sel reproduksi, bakteri, fungi, protista, virus, dan organel berdiri sendiri. Semua dirender procedural di browser Anda — tanpa model eksternal, tanpa cloud.</p>
+        <p>Scale Explorer adalah eksplorer 3D lokal untuk <strong>39 spesimen di segala skala</strong> — dari satu atom hidrogen, melewati sel, virus, dan organel, hingga Matahari, delapan planet, Bulan, dan galaksi spiral. Semua dirender procedural di browser Anda — tanpa model eksternal, tanpa cloud.</p>
+        <p><strong>Skala kosmos:</strong> penambahan terbaru menghadirkan kategori <em>Bintang</em>, <em>Planet</em>, <em>Bulan</em>, dan <em>Galaksi</em>. Set Tata Surya dan galaksi dirancang untuk terus diperluas (lebih banyak bulan, planet kerdil, nebula, dan jenis galaksi ke depannya).</p>
         ${fig("01-landing.png", "Tampilan landing: Plant Cell terpilih, sidebar dikelompokkan per kategori, gizmo XYZ kanan-atas, kontrol viewport di bagian bawah.", "Tampilan landing: Plant Cell terpilih, sidebar dikelompokkan per kategori, gizmo XYZ kanan-atas, kontrol viewport di bagian bawah.", "id")}
         <h3>Buka aplikasi</h3>
         <ol>
@@ -275,7 +277,7 @@ function manualId() {
         <h3>Bilah atas</h3>
         <p>Lima tab — <strong>Galeri</strong>, <strong>Pustaka</strong>, <strong>Terbaru</strong>, <strong>Panduan</strong>, <strong>Pengaturan</strong> — ditambah lencana API aktif/statis, pencarian, dan avatar.</p>
         <h3>Sidebar kiri</h3>
-        <p>Pustaka sel yang bisa di-scroll, dikelompokkan jadi 9 kategori: <em>Tissue cells</em>, <em>Immune cells</em>, <em>Blood cells</em>, <em>Reproductive cells</em>, <em>Bacteria</em>, <em>Fungi</em>, <em>Protists</em>, <em>Viruses</em>, <em>Standalone organelles</em>. Setiap item punya thumbnail 3D asli.</p>
+        <p>Pustaka spesimen yang bisa di-scroll, dikelompokkan jadi 14 kategori lintas skala: <em>Tissue cells</em>, <em>Immune cells</em>, <em>Blood cells</em>, <em>Reproductive cells</em>, <em>Bacteria</em>, <em>Fungi</em>, <em>Protists</em>, <em>Viruses</em>, <em>Standalone organelles</em>, <em>Atoms</em>, <em>Stars</em>, <em>Planets</em>, <em>Moons</em>, dan <em>Galaxies</em>. Setiap item punya thumbnail 3D asli.</p>
         <h3>Viewport utama</h3>
         <p>Render 3D procedural untuk spesimen terpilih. <strong>Drag</strong> untuk memutar, <strong>scroll</strong> untuk zoom, <strong>drag kanan</strong> untuk geser. Gizmo XYZ di kanan atas menunjukkan orientasi kamera.</p>
         <h3>Panel kanan</h3>
@@ -291,7 +293,7 @@ function manualId() {
           { src: "manual-fig-microscope.png", en: "", id: "Mikroskop — vignette + scanline." },
           { src: "10-electron-microscope.png", en: "", id: "Mikroskop Elektron — SEM monokrom." },
           { src: "08-process-mode.png", en: "", id: "Proses — timeline replikasi virus." },
-          { src: "02-atlas.png", en: "", id: "Atlas — semua 26 spesimen sekaligus." },
+          { src: "02-atlas.png", en: "", id: "Atlas — semua 39 spesimen sekaligus." },
         ], "id")}
         <dl>
           <dt>Tunggal</dt>
@@ -303,7 +305,7 @@ function manualId() {
           <dt>Proses</dt>
           <dd>Timeline siklus virus (hanya untuk 6 virus). Auto-play 5 tahap dengan narasi per-tahap.</dd>
           <dt>Atlas</dt>
-          <dd>Semua 26 spesimen mengorbit pada cincin bersama dengan garis link.</dd>
+          <dd>Semua 39 spesimen mengorbit pada cincin bersama dengan garis link.</dd>
         </dl>
         <p>Tip: deep-link <code>?mode=electron</code> langsung membuka mode tersebut.</p>`,
     },
@@ -336,7 +338,7 @@ function manualId() {
       body: `
         <p>Setiap tab bilah-atas membuka panel overlay layar penuh. Klik tab aktif lagi atau tekan <kbd>Esc</kbd> untuk menutup.</p>
         ${figRow([
-          { src: "03-gallery.png", en: "", id: "Galeri — semua 26 spesimen sebagai kartu." },
+          { src: "03-gallery.png", en: "", id: "Galeri — semua 39 spesimen sebagai kartu." },
           { src: "manual-fig-library.png", en: "", id: "Pustaka — daftar terkategori dengan pencarian." },
           { src: "manual-fig-recents.png", en: "", id: "Terbaru — 12 spesimen terakhir yang dilihat." },
         ], "id")}
@@ -345,7 +347,7 @@ function manualId() {
           { src: "15-settings-panel.png", en: "", id: "Pengaturan — tema, bahasa, autoplay." },
         ], "id")}
         <h3>Galeri</h3>
-        <p>Tampilan grid semua 26 spesimen dengan thumbnail + lencana kategori. Klik kartu apapun untuk membuka sel tersebut.</p>
+        <p>Tampilan grid semua 39 spesimen dengan thumbnail + lencana kategori. Klik kartu apapun untuk membuka sel tersebut.</p>
         <h3>Pustaka</h3>
         <p>Daftar terkategori dengan kotak pencarian langsung. Pencarian cocok dengan label, kingdom, ringkasan, dan nama organel.</p>
         <h3>Terbaru</h3>

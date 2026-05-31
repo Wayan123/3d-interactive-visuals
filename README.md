@@ -1,6 +1,8 @@
-# Cell Architecture Studio 3D
+# Scale Explorer — 3D Interactive Visuals
 
-> Local 3D explorer for **26 biological specimens** — tissue cells, immune cells, blood cells, reproductive cells, bacteria, fungi, protists, **6 viruses** (SARS-CoV-2, Bacteriophage T4, HIV, Influenza A, Adenovirus, Ebola), and standalone organelles. 100 % procedural Three.js. Backend Python standard library only. Dark / Light / System theme. English + Bahasa Indonesia. No external 3D model services.
+> Local 3D explorer spanning **every scale of nature** — from a single **hydrogen atom**, through **cells, viruses, and organelles**, all the way out to the **Sun, the eight planets, the Moon, and spiral galaxies**. **39 specimens** in **14 categories**, 100 % procedural Three.js, backend Python standard library only. Dark / Light / System theme. English + Bahasa Indonesia. No external 3D model services.
+>
+> *Formerly "Cell Architecture Studio" — renamed because the atlas now reaches well beyond cells, from the atomic scale to the galactic scale.*
 
 ![Demo walkthrough](agent-fleet-dashboard/docs/screenshots/demo.gif)
 
@@ -20,7 +22,7 @@ No `pip install`, no `npm install`. Just Python 3.10+ and a browser. Three.js lo
 
 ## What's inside
 
-- **26 specimens** across 9 categories:
+- **39 specimens** across 14 categories spanning the **atomic → biological → cosmic** scales:
   - *Tissue cells* (6): Plant, Animal, Neuron, Epithelial, Stem, Muscle
   - *Immune cells* (4): T-cell, B-cell, Macrophage, Neutrophil
   - *Blood cells* (2): Red Blood Cell, Platelet
@@ -30,15 +32,35 @@ No `pip install`, no `npm install`. Just Python 3.10+ and a browser. Three.js lo
   - *Protists* (2): Paramecium, Amoeba
   - *Viruses* (6): SARS-CoV-2, Bacteriophage T4, HIV, Influenza A, Adenovirus, Ebola
   - *Standalone organelles* (2): Mitochondrion, Ribosome
+  - *Atoms* (1): Hydrogen Atom
+  - *Stars* (1): The Sun
+  - *Planets* (8): Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
+  - *Moons* (1): The Moon
+  - *Galaxies* (2): Milky Way (barred spiral), Andromeda / M31
 - **6 view modes**: Standalone · Microscope · Electron Microscope · **Process** (virus lifecycle) · Atlas · Compare
-- **Read View** with auto-annotated leader-lines + labels per organelle
+- **Read View** with auto-annotated leader-lines + labels per component
 - **Cross-section** (XYZ clipping plane) to reveal interior
 - **Process view** — animated 5-stage virus replication timeline with narration
 - **5 top-bar panels**: Gallery · Library · Recents · **Manual** (bilingual in-app guide, 11 sections) · Settings
 - **3 themes** (Dark / Light / System) and **bilingual UI** (English + Bahasa Indonesia)
-- **3D Export** (Cell JSON, Atlas JSON, GLB via `GLTFExporter`, STEP-via-build123d instructions)
-- **Axis gizmo XYZ indicator**, hover tooltips, click-to-select organelles
+- **3D Export** (Specimen JSON, Atlas JSON, GLB via `GLTFExporter`, STEP-via-build123d instructions)
+- **Axis gizmo XYZ indicator**, hover tooltips, click-to-select components
 - **Backend Python stdlib only** — `/api/health`, `/api/cells`, `/api/services`, `/api/fleet`, zero pip deps
+
+## New in v0.8 — the Cosmos scale 🪐
+
+Scale Explorer now reaches past biology in both directions:
+
+- **Atomic scale**: a conceptual **Hydrogen Atom** (proton nucleus, 1s probability cloud, Bohr orbit guides, animated electron).
+- **Solar System**: the **Sun** (photosphere + core + corona + plasma flares), all **8 planets** (terrestrial, gas giants, ice giants), Saturn with a ring system, Jupiter with cloud bands + Great Red Spot, Earth with atmosphere + orbiting **Moon**.
+- **Galaxies**: the **Milky Way** (barred spiral, ~2,600-star point cloud along logarithmic arms) and **Andromeda / M31** (grand-design spiral).
+
+The Cosmos specimens occupy a dedicated elevated band in the Atlas so the macroscopic bodies never visually collide with the microscopic biology. Each cosmic specimen carries real educational stats (diameters, temperatures, moon counts, distances, ages) and the Solar System + galaxy sets are **designed to keep expanding** (more moons, dwarf planets, nebulae, and galaxy types over time).
+
+```text
+Atom  →  Organelle  →  Cell  →  Virus  →  Planet  →  Star  →  Galaxy
+  ▲ smallest                                              largest ▲
+```
 
 ## Screenshots
 
@@ -46,9 +68,11 @@ No `pip install`, no `npm install`. Just Python 3.10+ and a browser. Three.js lo
 
 ![Landing](agent-fleet-dashboard/docs/screenshots/01-landing.png)
 
-### Atlas — all 26 specimens at once
+### Atlas — all 39 specimens at once (atoms → cells → planets → galaxies)
 
 ![Atlas](agent-fleet-dashboard/docs/screenshots/02-atlas.png)
+
+> Note: the Atlas screenshot above predates the Cosmos additions; the Sun, planets, Moon, and galaxies now render in a dedicated elevated band behind the biology cluster. Run the app locally (or open `?mode=atlas`) to see all 39 specimens together. Fresh Cosmos screenshots are tracked in [`ROADMAP.md`](ROADMAP.md).
 
 ### Gallery panel — grid with rendered thumbnails
 
@@ -124,7 +148,7 @@ No `pip install`, no `npm install`. Just Python 3.10+ and a browser. Three.js lo
 3d-interactive-visuals/
 ├── README.md                              this file
 ├── LICENSE                                MIT
-└── agent-fleet-dashboard/                 the live Cell Architecture Studio app
+└── agent-fleet-dashboard/                 the live Scale Explorer app
     ├── index.html
     ├── run.sh
     ├── server.py                          Python stdlib backend
@@ -133,19 +157,19 @@ No `pip install`, no `npm install`. Just Python 3.10+ and a browser. Three.js lo
     │   ├── app.js                         frontend orchestrator
     │   ├── styles.css                     theme + panels + tooltips
     │   └── bio/
-    │       ├── geometry.js                16 procedural cell builders
+    │       ├── geometry.js                30 procedural builders (cells → atoms → planets → galaxies)
     │       ├── scene.js                   scene, lighting, bloom, modes, gizmo
     │       ├── thumbnails.js              offscreen WebGL thumbnail renderer
-    │       ├── i18n.js                    en + id translations (190+ keys)
+    │       ├── i18n.js                    en + id translations (125 keys each)
     │       ├── manual.js                  bilingual user manual content
     │       ├── microscope.js              legacy CSS overlay
     │       └── poll.js                    API polling with graceful fallback
     ├── cad_source/                        build123d Python (OPTIONAL export)
-    ├── data/cells.json                    16 cells + 6 categories + taxonomy + lifecycles
+    ├── data/cells.json                    39 specimens + 14 categories + taxonomy + lifecycles
     └── docs/
         ├── BIOCELL_ARCHITECTURE.md
         ├── CRITIQUE_LOG.md                iteration notes
-        └── screenshots/                   demo GIF + 15 PNG screenshots
+        └── screenshots/                   demo GIF + PNG screenshots
 ```
 
 See [`agent-fleet-dashboard/README.md`](agent-fleet-dashboard/README.md) for the full app documentation, deep-link parameters, and `docs/CRITIQUE_LOG.md` for the iteration history.
@@ -153,12 +177,24 @@ See [`agent-fleet-dashboard/README.md`](agent-fleet-dashboard/README.md) for the
 ## Deep-links (try these)
 
 ```text
+# Biology
 http://127.0.0.1:8877/?cell=bacteriophage&mode=process
 http://127.0.0.1:8877/?cell=hiv&mode=standalone&section=y:50
 http://127.0.0.1:8877/?cell=animal-cell&mode=standalone&read=1
 http://127.0.0.1:8877/?cell=influenza&mode=electron
+
+# Atoms & Cosmos (new)
+http://127.0.0.1:8877/?cell=hydrogen-atom&mode=standalone
+http://127.0.0.1:8877/?cell=sun&mode=standalone
+http://127.0.0.1:8877/?cell=saturn&mode=standalone&read=1
+http://127.0.0.1:8877/?cell=earth&mode=standalone&section=x:50
+http://127.0.0.1:8877/?cell=milky-way&mode=standalone
+http://127.0.0.1:8877/?cell=jupiter&mode=compare
+
+# Theme / language / panels
 http://127.0.0.1:8877/?theme=light&lang=id&panel=gallery
 http://127.0.0.1:8877/?panel=manual&lang=id
+http://127.0.0.1:8877/?mode=atlas
 ```
 
 ## Environment variables (optional)
@@ -192,9 +228,20 @@ http://127.0.0.1:8877/?panel=manual&lang=id
 - **[build123d](https://github.com/gumyr/build123d)** + **[OCP](https://github.com/CadQuery/OCP)** — optional Python CAD kernel for STEP/GLB export (Apache-2.0).
 - **[ImageMagick](https://imagemagick.org/)** + **[ffmpeg](https://ffmpeg.org/)** — used offline to generate demo GIFs from screenshot sequences.
 
-### Biology content
+### Science content
 
-All cell / virus / organelle structural data in `cells.json` (sizes, lifecycle stages, organelle roles, fun facts) are synthesised from general public-domain biology knowledge. The 3D geometry is stylised and educational — **not** anatomically precise to nanometre scale. Do not use for clinical or research reference.
+All specimen structural data in `cells.json` (sizes, lifecycle stages, component roles, fun facts, planetary stats, galaxy distances) are synthesised from general public-domain science knowledge. The 3D geometry is **stylised and educational** — deliberately not to physical scale. Atomic visuals are conceptual teaching models (electrons are not literal orbiting planets); planet and galaxy sizes/distances are compressed for display. Do not use for clinical, research, or navigational reference.
+
+### Changelog
+
+- **v0.8** — Renamed *Cell Architecture Studio* → **Scale Explorer**. Added the **Cosmos** scale: Sun, 8 planets, the Moon, Milky Way + Andromeda galaxies, plus a conceptual Hydrogen Atom. **39 specimens** across **14 categories** (added Atoms, Stars, Planets, Moons, Galaxies). New procedural builders `buildStar`, `buildPlanet`, `buildSpiralGalaxy`. Cosmos atlas band, planet/galaxy/star animations, point-cloud opacity fade, real barred-spiral geometry. Bilingual brand + manual updates.
+- **v0.7** — 10 new biology specimens (26 total) across 9 categories.
+- **v0.6** — In-app bilingual User Manual + demo GIF + screenshots.
+- **v0.5** — Functional panels, 3 themes, English + Bahasa Indonesia.
+- **v0.4** — 4 new viruses + RBC, Process view, Section view, hover tooltips (16 specimens).
+- **v0.3** — Cell Architecture Studio pivot: top bar, Read View, Compare, Electron Microscope, GLB export.
+- **v0.2** — BioCell Atlas 3D: 8 procedural cells, bloom, live API.
+- **v0.1** — Initial 3D AI Agent Fleet Dashboard prototype.
 
 ### Sample mockup
 

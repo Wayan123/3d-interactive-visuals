@@ -1,0 +1,32 @@
+name: Bug report
+description: Report something broken in the local viewer, data, docs, or deployment.
+title: "Bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run ./run.sh
+        2. Open ...
+        3. Click ...
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: Chrome 126 on Windows 11 / WSL2
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console/server logs
+      render: text
