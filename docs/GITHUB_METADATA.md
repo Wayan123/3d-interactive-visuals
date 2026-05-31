@@ -5,7 +5,7 @@ GitHub repository settings cannot be committed directly, but these values should
 ## Description
 
 ```text
-Interactive 3D science atlas for learning cells, viruses, organelles, molecules, atoms, and other visual concepts in the browser.
+Interactive 3D science atlas: explore atoms, cells, viruses, organelles, planets, stars, and galaxies in the browser. 100% procedural Three.js, bilingual EN/ID, runs offline.
 ```
 
 ## Homepage
@@ -25,6 +25,8 @@ interactive-learning
 cells
 viruses
 atoms
+astronomy
+solar-system
 open-source
 indonesia
 ```
